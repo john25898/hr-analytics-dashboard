@@ -96,14 +96,9 @@ export function LeaveSyncPanel({ onImport }: LeaveSyncPanelProps) {
   React.useEffect(() => {
     pullFromBackend();
     const interval = setInterval(pullFromBackend, 120000);
-    const onFocus = () => {
-      if (document.visibilityState === "visible") void pullFromBackend();
-    };
-    window.addEventListener("focus", onFocus);
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener("focus", onFocus);
-    };
+    // No `focus` listener: embedded browsers fire it on every click, which
+    // made the Leave page look like it was reloading itself.
+    return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

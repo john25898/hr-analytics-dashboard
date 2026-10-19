@@ -107,7 +107,7 @@ export default function TimesheetsPage() {
   // manual step — without re-rendering this page every 30 seconds.
   const { data, isLoading, mutate } = useSWR("/api/timesheet-sync", fetcher, {
     refreshInterval: 120000,
-    revalidateOnFocus: true,
+    revalidateOnFocus: false,
   });
 
   const entries: any[] = data?.entries || [];

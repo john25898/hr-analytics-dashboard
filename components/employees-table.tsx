@@ -79,14 +79,9 @@ export function EmployeesTable({
   employees,
   onEmployeeClick,
 }: EmployeesTableProps) {
-  const [storeVersion, setStoreVersion] = React.useState(0);
-
-  // Refresh when component gets focus (user may have edited contract dates)
-  React.useEffect(() => {
-    const onFocus = () => setStoreVersion((v) => v + 1);
-    window.addEventListener("focus", onFocus);
-    return () => window.removeEventListener("focus", onFocus);
-  }, []);
+  // No `focus` listener: embedded browsers fire it on every click, which
+  // re-rendered the whole 181-row table constantly. The store already
+  // broadcasts `hr-modifications-change` when data actually changes.
 
   return (
     <div className="overflow-x-auto">

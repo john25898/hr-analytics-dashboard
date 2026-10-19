@@ -9,10 +9,8 @@ const TABLE = "timesheets";
 export async function GET() {
   try {
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-      return NextResponse.json(
-        { error: "Supabase env not configured", entries: [] },
-        { status: 500 },
-      );
+      // No shared backend configured — return empty with 200 (see staff-sync).
+      return NextResponse.json({ entries: [], offline: true });
     }
     const res = await fetch(
       `${SUPABASE_URL}/rest/v1/${TABLE}?select=data&order=updated_at.desc`,
@@ -54,10 +52,8 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-      return NextResponse.json(
-        { error: "Supabase env not configured" },
-        { status: 500 },
-      );
+      // Nothing to sync to — the local store already holds the data.
+      return NextResponse.json({ ok: false, offline: true, pushed: 0 });
     }
     const body = await request.json();
     const entries: any[] = Array.isArray(body?.entries) ? body.entries : [];

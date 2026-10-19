@@ -11,10 +11,10 @@ const TABLE = "employees";
 export async function GET() {
   try {
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-      return NextResponse.json(
-        { error: "Supabase env not configured", staff: [], total: 0 },
-        { status: 500 },
-      );
+      // No shared backend configured in this deployment. That is a normal
+      // state, not an error: return an empty mirror with 200 so the browser
+      // does not log (and retry) a failed request on every sync tick.
+      return NextResponse.json({ staff: [], total: 0, offline: true });
     }
     const res = await fetch(
       `${SUPABASE_URL}/rest/v1/${TABLE}?select=data&order=updated_at.desc`,

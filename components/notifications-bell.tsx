@@ -48,11 +48,9 @@ export function NotificationsBell({ compact = false }: { compact?: boolean }) {
   React.useEffect(() => {
     const sync = () => setStoreMods(getModifications());
     window.addEventListener("storage", sync);
-    window.addEventListener("focus", sync);
     window.addEventListener("hr-modifications-change", sync);
     return () => {
       window.removeEventListener("storage", sync);
-      window.removeEventListener("focus", sync);
       window.removeEventListener("hr-modifications-change", sync);
     };
   }, []);

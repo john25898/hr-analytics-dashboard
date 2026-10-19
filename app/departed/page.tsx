@@ -144,12 +144,8 @@ export default function DepartedPage() {
     setStoreMods(getModifications());
   }, []);
 
-  // Refresh when window gets focus (user may have edited from employees page)
-  React.useEffect(() => {
-    const onFocus = () => setStoreMods(getModifications());
-    window.addEventListener("focus", onFocus);
-    return () => window.removeEventListener("focus", onFocus);
-  }, []);
+  // No `focus` listener: embedded browsers fire it on every click. The store
+  // already broadcasts `hr-modifications-change` when data actually changes.
 
   const now = new Date();
 

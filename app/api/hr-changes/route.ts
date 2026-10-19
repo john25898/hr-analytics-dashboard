@@ -12,10 +12,8 @@ const TABLE = "hr_employee_changes";
 export async function GET() {
   try {
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-      return NextResponse.json(
-        { error: "Supabase env not configured", changes: [], total: 0 },
-        { status: 500 },
-      );
+      // No shared backend configured — return empty with 200 (see staff-sync).
+      return NextResponse.json({ changes: [], total: 0, offline: true });
     }
     const res = await fetch(
       `${SUPABASE_URL}/rest/v1/${TABLE}?select=id,change_type,ref_id,data&order=updated_at.desc`,
@@ -57,10 +55,8 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-      return NextResponse.json(
-        { error: "Supabase env not configured" },
-        { status: 500 },
-      );
+      // Nothing to sync to — localStorage already holds the change.
+      return NextResponse.json({ ok: false, offline: true, pushed: 0 });
     }
     const body = await request.json();
     const changes: any[] = Array.isArray(body?.changes) ? body.changes : [];
@@ -114,10 +110,8 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-      return NextResponse.json(
-        { error: "Supabase env not configured" },
-        { status: 500 },
-      );
+      // Nothing to delete remotely — localStorage is the source of truth.
+      return NextResponse.json({ ok: false, offline: true, deleted: 0 });
     }
     const { searchParams } = new URL(request.url);
     const change_type = searchParams.get("change_type");

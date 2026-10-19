@@ -22,7 +22,11 @@ import { mutate } from "swr";
 const REVALIDATE_DELAY_MS = 250;
 const POLL_INTERVAL_MS = 120_000;
 // Ignore repeated sync events that arrive while a revalidation is in flight.
-const MIN_GAP_MS = 1_500;
+// This used to be 1.5s, which let an embedded browser (VS Code webview, or any
+// iframe) re-fetch /api/employees + /api/analytics on every single click, since
+// such browsers fire a `focus` event on each interaction. 60s is enough to pick
+// up other people's edits without the dashboard appearing to "refresh" itself.
+const MIN_GAP_MS = 60_000;
 
 let lastRevalidateAt = 0;
 
@@ -48,12 +52,14 @@ export function DataSync() {
 
     // Coming back to the tab is the best moment to pick up other people's
     // changes — no need to poll aggressively while it sits in front of you.
+    // NOTE: deliberately no `focus` listener. Embedded browsers fire `focus`
+    // on every click into the frame, which made the whole dashboard re-fetch
+    // (and visibly redraw) constantly.
     const onVisible = () => {
       if (document.visibilityState === "visible") void revalidateApiKeys();
     };
 
     window.addEventListener("hr-data-synced", onSynced);
-    window.addEventListener("focus", onVisible);
     document.addEventListener("visibilitychange", onVisible);
 
     // Slow safety-net poll (only while the tab is visible).
@@ -65,7 +71,6 @@ export function DataSync() {
 
     return () => {
       window.removeEventListener("hr-data-synced", onSynced);
-      window.removeEventListener("focus", onVisible);
       document.removeEventListener("visibilitychange", onVisible);
       window.clearInterval(poll);
     };

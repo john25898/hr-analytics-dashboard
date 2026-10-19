@@ -97,7 +97,7 @@ export default function LeavePage() {
   // Mirror of the CMaT staff roster (pushed on login in the CMaT app)
   const { data: syncData } = useSWR("/api/staff-sync", fetcher, {
     refreshInterval: 180000,
-    revalidateOnFocus: true,
+    revalidateOnFocus: false,
   });
 
   const leaveTypes: any[] = data?.leaveTypes || [];

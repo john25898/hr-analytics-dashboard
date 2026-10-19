@@ -1,4 +1,3 @@
-import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import { AuthGate } from "@/components/auth-gate";
 import { DataSync } from "@/components/data-sync";
@@ -48,7 +47,6 @@ export default function RootLayout({
           <DataSync />
           {children}
         </AuthGate>
-        {process.env.NODE_ENV === "production" && <Analytics />}
       </body>
     </html>
   );
