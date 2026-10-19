@@ -2,6 +2,8 @@
 
 Standalone Next.js 16 HR analytics dashboard (App Router, React 19, Tailwind v4, Recharts).
 
+**Live:** https://hr-analytics-dashboard-h66i.onrender.com
+
 ## Local development
 
 ```bash
@@ -22,9 +24,10 @@ This repo includes a [`render.yaml`](./render.yaml) blueprint.
 
 1. Open https://render.com/deploy?repo=https://github.com/john25898/hr-analytics-dashboard
 2. Sign in with GitHub and approve the `render.yaml` blueprint.
-3. Render builds and serves the app at `https://hr-analytics-dashboard.onrender.com`.
+3. Render builds and serves the app at `https://hr-analytics-dashboard-h66i.onrender.com`.
 
 Notes:
+
 - The service uses the **free** plan (512 MB RAM, spins down after idle — the first request may take ~30 s).
 - `next.config.mjs` caps Turbopack to `cpus: 2` and disables the dev file-system cache so local dev does not saturate the CPU.
 
