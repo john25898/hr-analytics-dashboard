@@ -1,0 +1,27 @@
+{
+  "//": "Keep VS Code from watching Next.js build output. .next/dev/cache can hold >1 GB / 1,600 files; every dev recompile writes thousands of files and the watcher storm is what freezes the editor.",
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/*/**": true,
+    "**/.next/**": true,
+    "**/out/**": true,
+    "**/dist/**": true,
+    "**/build/**": true,
+    "**/coverage/**": true,
+    "**/.turbo/**": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/out": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/coverage": true,
+    "**/package-lock.json": true,
+    "**/tsconfig.tsbuildinfo": true
+  },
+  "typescript.tsserver.maxTsServerMemory": 2048,
+  "typescript.disableAutomaticTypeAcquisition": true,
+  "typescript.tsserver.experimental.enableProjectDiagnostics": false
+}

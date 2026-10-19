@@ -1,0 +1,647 @@
+{
+  "generatedAt": "2026-08-03",
+  "year": 2026,
+  "leaveTypes": [
+    {
+      "name": "Adoption Leave",
+      "entitlement": 30,
+      "color": "#f59e0b"
+    },
+    {
+      "name": "Annual Leave",
+      "entitlement": 30,
+      "color": "#3b82f6"
+    },
+    {
+      "name": "Compensatory Leave",
+      "entitlement": 10,
+      "color": "#14b8a6"
+    },
+    {
+      "name": "Maternity Leave",
+      "entitlement": 90,
+      "color": "#ec4899"
+    },
+    {
+      "name": "Other Leave",
+      "entitlement": 1,
+      "color": "#64748b"
+    },
+    {
+      "name": "Paternity Leave",
+      "entitlement": 14,
+      "color": "#8b5cf6"
+    },
+    {
+      "name": "Sick Leave",
+      "entitlement": 30,
+      "color": "#ef4444"
+    },
+    {
+      "name": "Sick Child Leave",
+      "entitlement": 7,
+      "color": "#f97316"
+    },
+    {
+      "name": "Study Leave",
+      "entitlement": 10,
+      "color": "#84cc16"
+    }
+  ],
+  "employees": [
+    {
+      "name": "Momanyi Dismas Mose",
+      "facility": "",
+      "isPlaceholder": false
+    },
+    {
+      "name": "Njeru Justin Fundi",
+      "facility": "",
+      "isPlaceholder": false
+    },
+    {
+      "name": "Wanjiku Simon Mwaura",
+      "facility": "",
+      "isPlaceholder": false
+    },
+    {
+      "name": "Barnard Ireri Njeru",
+      "facility": "",
+      "isPlaceholder": false
+    },
+    {
+      "name": "Kevin Koome Kinoti",
+      "facility": "",
+      "isPlaceholder": false
+    },
+    {
+      "name": "Duncan Mwirigi Arithi",
+      "facility": "",
+      "isPlaceholder": false
+    },
+    {
+      "name": "Douglas Gungu Govedi",
+      "facility": "",
+      "isPlaceholder": false
+    },
+    {
+      "name": "Zachariah Mwangi Kamau",
+      "facility": "",
+      "isPlaceholder": false
+    },
+    {
+      "name": "Staff 9",
+      "facility": "",
+      "isPlaceholder": true
+    },
+    {
+      "name": "Staff 10",
+      "facility": "",
+      "isPlaceholder": true
+    }
+  ],
+  "leaveLog": [
+    {
+      "id": "leave_2",
+      "employee": "Wanjiku Simon Mwaura",
+      "leaveType": "Annual Leave",
+      "startDate": "2026-07-24",
+      "endDate": "2026-07-24",
+      "days": 1,
+      "status": "Approved"
+    }
+  ],
+  "balances": [
+    {
+      "employee": "Momanyi Dismas Mose",
+      "breakdown": [
+        {
+          "type": "Adoption Leave",
+          "entitlement": 30,
+          "used": 0,
+          "balance": 30
+        },
+        {
+          "type": "Annual Leave",
+          "entitlement": 30,
+          "used": 0,
+          "balance": 30
+        },
+        {
+          "type": "Compensatory Leave",
+          "entitlement": 10,
+          "used": 0,
+          "balance": 10
+        },
+        {
+          "type": "Maternity Leave",
+          "entitlement": 90,
+          "used": 0,
+          "balance": 90
+        },
+        {
+          "type": "Other Leave",
+          "entitlement": 1,
+          "used": 0,
+          "balance": 1
+        },
+        {
+          "type": "Paternity Leave",
+          "entitlement": 14,
+          "used": 0,
+          "balance": 14
+        },
+        {
+          "type": "Sick Leave",
+          "entitlement": 30,
+          "used": 0,
+          "balance": 30
+        },
+        {
+          "type": "Sick Child Leave",
+          "entitlement": 7,
+          "used": 0,
+          "balance": 7
+        },
+        {
+          "type": "Study Leave",
+          "entitlement": 10,
+          "used": 0,
+          "balance": 10
+        }
+      ]
+    },
+    {
+      "employee": "Njeru Justin Fundi",
+      "breakdown": [
+        {
+          "type": "Adoption Leave",
+          "entitlement": 30,
+          "used": 0,
+          "balance": 30
+        },
+        {
+          "type": "Annual Leave",
+          "entitlement": 30,
+          "used": 0,
+          "balance": 30
+        },
+        {
+          "type": "Compensatory Leave",
+          "entitlement": 10,
+          "used": 0,
+          "balance": 10
+        },
+        {
+          "type": "Maternity Leave",
+          "entitlement": 90,
+          "used": 0,
+          "balance": 90
+        },
+        {
+          "type": "Other Leave",
+          "entitlement": 1,
+          "used": 0,
+          "balance": 1
+        },
+        {
+          "type": "Paternity Leave",
+          "entitlement": 14,
+          "used": 0,
+          "balance": 14
+        },
+        {
+          "type": "Sick Leave",
+          "entitlement": 30,
+          "used": 0,
+          "balance": 30
+        },
+        {
+          "type": "Sick Child Leave",
+          "entitlement": 7,
+          "used": 0,
+          "balance": 7
+        },
+        {
+          "type": "Study Leave",
+          "entitlement": 10,
+          "used": 0,
+          "balance": 10
+        }
+      ]
+    },
+    {
+      "employee": "Wanjiku Simon Mwaura",
+      "breakdown": [
+        {
+          "type": "Adoption Leave",
+          "entitlement": 30,
+          "used": 0,
+          "balance": 30
+        },
+        {
+          "type": "Annual Leave",
+          "entitlement": 30,
+          "used": 1,
+          "balance": 29
+        },
+        {
+          "type": "Compensatory Leave",
+          "entitlement": 10,
+          "used": 0,
+          "balance": 10
+        },
+        {
+          "type": "Maternity Leave",
+          "entitlement": 90,
+          "used": 0,
+          "balance": 90
+        },
+        {
+          "type": "Other Leave",
+          "entitlement": 1,
+          "used": 0,
+          "balance": 1
+        },
+        {
+          "type": "Paternity Leave",
+          "entitlement": 14,
+          "used": 0,
+          "balance": 14
+        },
+        {
+          "type": "Sick Leave",
+          "entitlement": 30,
+          "used": 0,
+          "balance": 30
+        },
+        {
+          "type": "Sick Child Leave",
+          "entitlement": 7,
+          "used": 0,
+          "balance": 7
+        },
+        {
+          "type": "Study Leave",
+          "entitlement": 10,
+          "used": 0,
+          "balance": 10
+        }
+      ]
+    },
+    {
+      "employee": "Barnard Ireri Njeru",
+      "breakdown": [
+        {
+          "type": "Adoption Leave",
+          "entitlement": 30,
+          "used": 0,
+          "balance": 30
+        },
+        {
+          "type": "Annual Leave",
+          "entitlement": 30,
+          "used": 0,
+          "balance": 30
+        },
+        {
+          "type": "Compensatory Leave",
+          "entitlement": 10,
+          "used": 0,
+          "balance": 10
+        },
+        {
+          "type": "Maternity Leave",
+          "entitlement": 90,
+          "used": 0,
+          "balance": 90
+        },
+        {
+          "type": "Other Leave",
+          "entitlement": 1,
+          "used": 0,
+          "balance": 1
+        },
+        {
+          "type": "Paternity Leave",
+          "entitlement": 14,
+          "used": 0,
+          "balance": 14
+        },
+        {
+          "type": "Sick Leave",
+          "entitlement": 30,
+          "used": 0,
+          "balance": 30
+        },
+        {
+          "type": "Sick Child Leave",
+          "entitlement": 7,
+          "used": 0,
+          "balance": 7
+        },
+        {
+          "type": "Study Leave",
+          "entitlement": 10,
+          "used": 0,
+          "balance": 10
+        }
+      ]
+    },
+    {
+      "employee": "Kevin Koome Kinoti",
+      "breakdown": [
+        {
+          "type": "Adoption Leave",
+          "entitlement": 30,
+          "used": 0,
+          "balance": 30
+        },
+        {
+          "type": "Annual Leave",
+          "entitlement": 30,
+          "used": 0,
+          "balance": 30
+        },
+        {
+          "type": "Compensatory Leave",
+          "entitlement": 10,
+          "used": 0,
+          "balance": 10
+        },
+        {
+          "type": "Maternity Leave",
+          "entitlement": 90,
+          "used": 0,
+          "balance": 90
+        },
+        {
+          "type": "Other Leave",
+          "entitlement": 1,
+          "used": 0,
+          "balance": 1
+        },
+        {
+          "type": "Paternity Leave",
+          "entitlement": 14,
+          "used": 0,
+          "balance": 14
+        },
+        {
+          "type": "Sick Leave",
+          "entitlement": 30,
+          "used": 0,
+          "balance": 30
+        },
+        {
+          "type": "Sick Child Leave",
+          "entitlement": 7,
+          "used": 0,
+          "balance": 7
+        },
+        {
+          "type": "Study Leave",
+          "entitlement": 10,
+          "used": 0,
+          "balance": 10
+        }
+      ]
+    },
+    {
+      "employee": "Duncan Mwirigi Arithi",
+      "breakdown": [
+        {
+          "type": "Adoption Leave",
+          "entitlement": 30,
+          "used": 0,
+          "balance": 30
+        },
+        {
+          "type": "Annual Leave",
+          "entitlement": 30,
+          "used": 0,
+          "balance": 30
+        },
+        {
+          "type": "Compensatory Leave",
+          "entitlement": 10,
+          "used": 0,
+          "balance": 10
+        },
+        {
+          "type": "Maternity Leave",
+          "entitlement": 90,
+          "used": 0,
+          "balance": 90
+        },
+        {
+          "type": "Other Leave",
+          "entitlement": 1,
+          "used": 0,
+          "balance": 1
+        },
+        {
+          "type": "Paternity Leave",
+          "entitlement": 14,
+          "used": 0,
+          "balance": 14
+        },
+        {
+          "type": "Sick Leave",
+          "entitlement": 30,
+          "used": 0,
+          "balance": 30
+        },
+        {
+          "type": "Sick Child Leave",
+          "entitlement": 7,
+          "used": 0,
+          "balance": 7
+        },
+        {
+          "type": "Study Leave",
+          "entitlement": 10,
+          "used": 0,
+          "balance": 10
+        }
+      ]
+    },
+    {
+      "employee": "Douglas Gungu Govedi",
+      "breakdown": [
+        {
+          "type": "Adoption Leave",
+          "entitlement": 30,
+          "used": 0,
+          "balance": 30
+        },
+        {
+          "type": "Annual Leave",
+          "entitlement": 30,
+          "used": 0,
+          "balance": 30
+        },
+        {
+          "type": "Compensatory Leave",
+          "entitlement": 10,
+          "used": 0,
+          "balance": 10
+        },
+        {
+          "type": "Maternity Leave",
+          "entitlement": 90,
+          "used": 0,
+          "balance": 90
+        },
+        {
+          "type": "Other Leave",
+          "entitlement": 1,
+          "used": 0,
+          "balance": 1
+        },
+        {
+          "type": "Paternity Leave",
+          "entitlement": 14,
+          "used": 0,
+          "balance": 14
+        },
+        {
+          "type": "Sick Leave",
+          "entitlement": 30,
+          "used": 0,
+          "balance": 30
+        },
+        {
+          "type": "Sick Child Leave",
+          "entitlement": 7,
+          "used": 0,
+          "balance": 7
+        },
+        {
+          "type": "Study Leave",
+          "entitlement": 10,
+          "used": 0,
+          "balance": 10
+        }
+      ]
+    },
+    {
+      "employee": "Zachariah Mwangi Kamau",
+      "breakdown": [
+        {
+          "type": "Adoption Leave",
+          "entitlement": 30,
+          "used": 0,
+          "balance": 30
+        },
+        {
+          "type": "Annual Leave",
+          "entitlement": 30,
+          "used": 0,
+          "balance": 30
+        },
+        {
+          "type": "Compensatory Leave",
+          "entitlement": 10,
+          "used": 0,
+          "balance": 10
+        },
+        {
+          "type": "Maternity Leave",
+          "entitlement": 90,
+          "used": 0,
+          "balance": 90
+        },
+        {
+          "type": "Other Leave",
+          "entitlement": 1,
+          "used": 0,
+          "balance": 1
+        },
+        {
+          "type": "Paternity Leave",
+          "entitlement": 14,
+          "used": 0,
+          "balance": 14
+        },
+        {
+          "type": "Sick Leave",
+          "entitlement": 30,
+          "used": 0,
+          "balance": 30
+        },
+        {
+          "type": "Sick Child Leave",
+          "entitlement": 7,
+          "used": 0,
+          "balance": 7
+        },
+        {
+          "type": "Study Leave",
+          "entitlement": 10,
+          "used": 0,
+          "balance": 10
+        }
+      ]
+    }
+  ],
+  "kenyaHolidays": [
+    {
+      "date": "2026-01-01",
+      "name": "New Year's Day"
+    },
+    {
+      "date": "2026-03-20",
+      "name": "Eid al-Fitr (approx)"
+    },
+    {
+      "date": "2026-04-03",
+      "name": "Good Friday"
+    },
+    {
+      "date": "2026-04-06",
+      "name": "Easter Monday"
+    },
+    {
+      "date": "2026-05-01",
+      "name": "Labour Day"
+    },
+    {
+      "date": "2026-05-27",
+      "name": "Eid al-Adha (approx)"
+    },
+    {
+      "date": "2026-06-01",
+      "name": "Madaraka Day"
+    },
+    {
+      "date": "2026-08-26",
+      "name": "Maulid (approx)"
+    },
+    {
+      "date": "2026-10-10",
+      "name": "Huduma Day"
+    },
+    {
+      "date": "2026-10-20",
+      "name": "Mashujaa Day"
+    },
+    {
+      "date": "2026-12-12",
+      "name": "Jamhuri Day"
+    },
+    {
+      "date": "2026-12-25",
+      "name": "Christmas Day"
+    },
+    {
+      "date": "2026-12-26",
+      "name": "Boxing Day"
+    }
+  ],
+  "summary": {
+    "totalEmployees": 8,
+    "totalLeaveEntries": 1,
+    "totalLeaveTypes": 9
+  }
+}

@@ -1,0 +1,360 @@
+{
+  "name": "Jamii Tekelezi (JTP) Facility Roster",
+  "counties": [
+    {
+      "county": "Embu",
+      "subCounties": [
+        {
+          "subCounty": "Manyatta",
+          "facilities": [
+            "Dallas Dispensary",
+            "Embu Children Hospital",
+            "Embu Provincial General Hospital",
+            "Emmanuel Kigari (ACK) Dispensary",
+            "Gatunduri Dispensary",
+            "Geltrude Health Centre",
+            "Kairuri Health Centre",
+            "Karau Health Centre",
+            "Kibugu Health Centre",
+            "Kithegi Dispensary",
+            "Kithimu Dispensary",
+            "Makengi Dispensary (Embu)",
+            "Nembure Health Centre",
+            "Rukira Dispensary"
+          ]
+        },
+        {
+          "subCounty": "Mbeere North",
+          "facilities": [
+            "Ishiara Sub-District Hospital",
+            "Kamumu Dispensary",
+            "Kanyuambora Dispensary",
+            "Kathanje Dispensary",
+            "Kiambere Dam Dispensary",
+            "Kirie Dispensary",
+            "Mbeere District Hospital"
+          ]
+        },
+        {
+          "subCounty": "Mbeere South",
+          "facilities": [
+            "Ccs Kiritiri Clinic",
+            "Gachuriri Dispensary",
+            "Kiambere Health Centre",
+            "Kiamuringa Dispensary",
+            "Kiritiri Health Centre",
+            "Liviero Dispensary",
+            "Machang'a Dispensary",
+            "Nganduri Dispensary",
+            "Riachina Dispensary",
+            "Rwika Dispensary"
+          ]
+        },
+        {
+          "subCounty": "Mwea",
+          "facilities": [
+            "Gategi Health Centre",
+            "Karaba Wango Dispensary",
+            "Makima Dispensary",
+            "Mbonzuki Dispensary",
+            "Wachoro Dispensary"
+          ]
+        },
+        {
+          "subCounty": "Runyenjes",
+          "facilities": [
+            "Acef Ena Health Centre",
+            "Gichiche Dispensary",
+            "Kanja Health Centre",
+            "Karurumo Rhtc",
+            "Kathunguri Dispensary",
+            "Kianjokoma Sub-District Hospital",
+            "Kigaa Dispensary",
+            "Kigumo Dispensary",
+            "Mufu Dispensary",
+            "Nthagaiya Catholic Dispensary",
+            "Runyenjes District Hospital",
+            "St Michael Nursing Home",
+            "Ugweri Dispensary"
+          ]
+        }
+      ]
+    },
+    {
+      "county": "Meru",
+      "subCounties": [
+        {
+          "subCounty": "Buuri  East",
+          "facilities": [
+            "Kibirichia Sub-District Hospital",
+            "Kiirua Health Centre",
+            "Mboroga Dispensary",
+            "Naari Health Centre",
+            "Ruiri Rural Health Demonstration Centre",
+            "St Theresa Hospital (Kiirua)"
+          ]
+        },
+        {
+          "subCounty": "Buuri West",
+          "facilities": [
+            "Lewa Downs Dispensary",
+            "Ontulili Dispensary",
+            "Timau Catholic Dispensary",
+            "Timau Sub-County Hospital"
+          ]
+        },
+        {
+          "subCounty": "Igembe Central",
+          "facilities": [
+            "Kangeta Heaith Centre",
+            "Kawiru Dispensary",
+            "Kiengu PCEA Dispensary",
+            "Kina Dispensary",
+            "Muutine Med Clinic",
+            "Nthambiro Dispensary",
+            "St Joseph Catholic Dispensary (Igembe)",
+            "Tuuru Catholic Health Centre"
+          ]
+        },
+        {
+          "subCounty": "Igembe North",
+          "facilities": [
+            "Kaelo Dispensary",
+            "Mutuati Sub-County Hospital",
+            "Theere Health Centre"
+          ]
+        },
+        {
+          "subCounty": "Igembe South",
+          "facilities": [
+            "Akachiu Health Centre",
+            "Christian Community Services Dispensary (Maua)",
+            "HWWK Maua Dice",
+            "Kawiria Maternity and Nursing Home",
+            "Kiraone Dispensary",
+            "Mutiokiama Health Centre",
+            "Nyambene District Hospital"
+          ]
+        },
+        {
+          "subCounty": "Imenti Central",
+          "facilities": [
+            "Gatimbi Health Centre",
+            "Githongo District Hospital",
+            "Kaongo Health Centre",
+            "St Lukes Cottage Hospital"
+          ]
+        },
+        {
+          "subCounty": "Imenti North",
+          "facilities": [
+            "Chugu Dispensary",
+            "Consolata Hospital Gitoro",
+            "Family Care Medical Centre (Meru)",
+            "Gakoromone Dispensary",
+            "Giaki Sub-District Hospital",
+            "Igoki Dispensary",
+            "Imenti North Dice (Meru)",
+            "Kathithi Dispensary",
+            "Kiamiriru MCK Dispensary",
+            "Kiburine Dispensary",
+            "Kinoru Dispensary",
+            "Meru District Hospital",
+            "Woodlands Hospital"
+          ]
+        },
+        {
+          "subCounty": "Imenti South",
+          "facilities": [
+            "Ichomba Clinic",
+            "Ithimbari Dispensary",
+            "Kanyakine District Hospital",
+            "Kathigu Health Centre",
+            "Kiarago Health Centre",
+            "Kieni Kia Ndege Dispensary",
+            "Kinoro Sub-District Hospital",
+            "Kionyo Dispensary",
+            "Kirogine Dispensary",
+            "Mikumbune Sub-District Hospital",
+            "Mitunguu CCS Dispensary",
+            "Mitunguu Dispensary",
+            "Mweru Dispensary",
+            "Nkubu Dispensary",
+            "Ntemwene Dispensary",
+            "Uruku Health Centre"
+          ]
+        },
+        {
+          "subCounty": "Tigania Central",
+          "facilities": [
+            "Amugaa Health Centre",
+            "Kiguchwa Dispensary",
+            "Kunati Health Centre",
+            "Mikinduri Sub-District Hospial"
+          ]
+        },
+        {
+          "subCounty": "Tigania East",
+          "facilities": [
+            "Charuru Dispensary",
+            "Karama Health Centre",
+            "Muthara Sub-District Hospital",
+            "St John of God Hospital Tigania"
+          ]
+        },
+        {
+          "subCounty": "Tigania West",
+          "facilities": [
+            "Kimachia Dispensary",
+            "Kunene Health Centre",
+            "Mbeu Sub-District Hospital",
+            "Miathene District Hospital",
+            "Mutionjuri Health Centre",
+            "Mweronkaga Health Centre",
+            "Uringu Health Centre"
+          ]
+        }
+      ]
+    },
+    {
+      "county": "Nyandarua",
+      "subCounties": [
+        {
+          "subCounty": "Kinangop",
+          "facilities": [
+            "Bamboo Health Centre",
+            "Engineer District Hospital",
+            "Heni Health Centre",
+            "Karangatha Health Centre",
+            "Mukungi Dispensary",
+            "Murungaru Health Centre",
+            "Nandarasi Dispensary",
+            "Ndunyu Njeru Dispensary",
+            "Njabini Health Centre",
+            "Our Lady of Mercy (Magumu)",
+            "Weru Health Centre (Nyandarua South)"
+          ]
+        },
+        {
+          "subCounty": "Kipipiri",
+          "facilities": [
+            "Geta Bush Health Centre",
+            "Lereshwa Dispensary",
+            "Manunga Health Centre",
+            "Ndemi Health Centre",
+            "Old Mawingu Health Centre",
+            "Turasha Dispensary",
+            "Wanjohi Health Centre"
+          ]
+        },
+        {
+          "subCounty": "Ndaragwa",
+          "facilities": [
+            "Baari Health Centre",
+            "Kahembe Health Centre",
+            "Kirima Dispensary",
+            "Kiriogo Dispensary",
+            "Leshau Pondo Health Centre",
+            "Mastoo Dispensary",
+            "Mbuyu Dispensary",
+            "Ndaragwa Health Centre",
+            "Pesi Dispensary",
+            "Shamata Health Centre",
+            "Subuku Dispensary (Nyandarua North)",
+            "Uruku Dispensary"
+          ]
+        },
+        {
+          "subCounty": "Oljoroorok",
+          "facilities": [
+            "Chamuka Dispensary",
+            "Gatimu Health Centre",
+            "Huhoini Dispensary",
+            "Kasuku Health Centre",
+            "Ngano Health Centre",
+            "Olborosat Dispensary",
+            "Oljororok Catholic Dispensary",
+            "Silibwet Health Centre (Nyandarua West)"
+          ]
+        },
+        {
+          "subCounty": "Olkalou",
+          "facilities": [
+            "JM Kariuki County Memorial Hospital (Olkalou)",
+            "Kaimbaga Dispensary",
+            "Mirangine Health Centre",
+            "New Mawingu Health Centre",
+            "New Tumaini Health Centre",
+            "Ngorika Dispensary",
+            "St Mathews and Sarah Dispensary",
+            "Tumaini National Youth Service Dispensary"
+          ]
+        }
+      ]
+    },
+    {
+      "county": "Tharaka Nithi",
+      "subCounties": [
+        {
+          "subCounty": "Chuka",
+          "facilities": [
+            "Chuka  County Refferal Hospital",
+            "Chuka Cottage Hospital",
+            "Ikuu Dispensary",
+            "Kambandi Dispensary",
+            "Kibugua Health Centre",
+            "Kiereni Dispensary",
+            "Mpukoni Health Centre",
+            "Mukuuni Dispensary",
+            "Presbyterian Ttc Rubate Health Centre"
+          ]
+        },
+        {
+          "subCounty": "Igambangombe",
+          "facilities": [
+            "Kaanwa Dispensary",
+            "Kajuki Health Centre",
+            "Kamaindi Dispensary"
+          ]
+        },
+        {
+          "subCounty": "Muthambi",
+          "facilities": [
+            "Minugu Dispensary",
+            "Muthambi Health Centre"
+          ]
+        },
+        {
+          "subCounty": "Mwimbi",
+          "facilities": [
+            "Baragu Health Centre",
+            "Kiamuchairu Health Centre",
+            "Magutuni District Hospital",
+            "Mukui Health Centre",
+            "Mutindwa Dispensary",
+            "Nguruki-Iruma Dispensary"
+          ]
+        },
+        {
+          "subCounty": "Tharaka North",
+          "facilities": [
+            "Gaciongo Dispensary",
+            "Gatunga Model Health Centre",
+            "Kamwathu Dispensary",
+            "Kathangacini Dispensary",
+            "Mukothima Health Centre",
+            "Thanantu Faith Clinic Dispensary"
+          ]
+        },
+        {
+          "subCounty": "Tharaka South",
+          "facilities": [
+            "Gatunga Health Centre",
+            "Kibunga Sub-District Hospital",
+            "Tharaka District Hospital"
+          ]
+        }
+      ]
+    }
+  ]
+}

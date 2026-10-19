@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: hr-analytics-dashboard
+    runtime: node
+    plan: free
+    region: frankfurt
+    branch: main
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 22.18.0
+      # Optional: only needed if you revive the Supabase leave-sync backend.
+      # The app runs fine without them (sync features degrade gracefully).
+      # - key: NEXT_PUBLIC_SUPABASE_URL
+      #   sync: false
+      # - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+      #   sync: false
