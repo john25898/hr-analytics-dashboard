@@ -11,6 +11,10 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 22.18.0
+      # Free instances get 512 MB RAM. Capping the V8 heap makes the build
+      # GC aggressively instead of being OOM-killed.
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=450
       # Optional: only needed if you revive the Supabase leave-sync backend.
       # The app runs fine without them (sync features degrade gracefully).
       # - key: NEXT_PUBLIC_SUPABASE_URL
