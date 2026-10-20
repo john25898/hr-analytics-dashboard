@@ -5,39 +5,28 @@ import useSWR from "swr";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { addNewWorker, type NewWorkerRecord } from "@/lib/employee-store";
+import {
+  addDisability,
+  addNewWorker,
+  type NewWorkerRecord,
+} from "@/lib/employee-store";
 import {
   rosterCounties,
   rosterFacilities,
   rosterSubCounties,
 } from "@/lib/facility-roster";
+import {
+  CATEGORIES,
+  CONTRACT_TYPES,
+  DISABILITY_TYPES,
+  EDUCATION_LEVELS,
+  PROJECTS,
+  REGULATORY_BODIES,
+  SUPPORT_SUGGESTIONS,
+  WORKSTATIONS,
+} from "@/lib/hr-options";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-// ── Add New Worker option lists ────────────────────────────────────────────
-const CATEGORIES = ["CHAK", "HRH", "CBSL"];
-const EMPLOYMENT_TYPES = ["Contract", "Casual Laborer", "Internship"];
-const PROJECTS = [
-  "Daraja",
-  "Eye Health (ACSP)",
-  "GitLab",
-  "Gates Foundation MNCH",
-  "BFTW RMNCAH",
-  "EIS",
-  "PEP",
-  "IMPACT Project",
-  "CDIC / iCARE",
-  "Internship Program",
-];
-// CHAK staff are attached to an office (workstation) instead of the
-// county -> sub-county -> facility chain used by HRH / CBSL staff.
-const WORKSTATIONS = [
-  "HQ",
-  "Meru Office",
-  "Kitui Office",
-  "Embu Office",
-  "Tharaka Nithi Office",
-];
 
 export function NewWorkerModal({
   open,
@@ -55,6 +44,8 @@ export function NewWorkerModal({
   const [gender, setGender] = React.useState("");
   const [phone, setPhone] = React.useState("");
   const [idNo, setIdNo] = React.useState("");
+  const [workEmail, setWorkEmail] = React.useState("");
+  const [personalEmail, setPersonalEmail] = React.useState("");
   const [category, setCategory] = React.useState("");
   const [employmentType, setEmploymentType] = React.useState("");
   const [project, setProject] = React.useState("");
@@ -72,6 +63,8 @@ export function NewWorkerModal({
   const [regulatoryBody, setRegulatoryBody] = React.useState("");
   const [licenceNo, setLicenceNo] = React.useState("");
   const [validUntil, setValidUntil] = React.useState("");
+  const [disability, setDisability] = React.useState("");
+  const [supportNeeded, setSupportNeeded] = React.useState("");
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState("");
 
@@ -100,6 +93,8 @@ export function NewWorkerModal({
     setGender("");
     setPhone("");
     setIdNo("");
+    setWorkEmail("");
+    setPersonalEmail("");
     setCategory("");
     setEmploymentType("");
     setProject("");
@@ -117,6 +112,8 @@ export function NewWorkerModal({
     setRegulatoryBody("");
     setLicenceNo("");
     setValidUntil("");
+    setDisability("");
+    setSupportNeeded("");
     setError("");
   };
 
@@ -151,6 +148,8 @@ export function NewWorkerModal({
       gender,
       phone,
       idNo,
+      workEmail: workEmail.trim(),
+      personalEmail: personalEmail.trim(),
       category,
       employmentType,
       project,
@@ -168,12 +167,37 @@ export function NewWorkerModal({
       regulatoryBody,
       licenceNo,
       validUntil,
+      // Only kept when a disability was actually declared.
+      disability,
+      supportNeeded: disability ? supportNeeded : "",
     };
     setSaving(true);
     try {
       // Wait for the shared-backend write so counts refresh with the new
       // worker included (no manual browser refresh needed).
       await addNewWorker(record);
+      // Mirror the declaration into the Disabilities register so it is
+      // tracked for accommodations and reporting.
+      if (disability) {
+        addDisability({
+          id: `disability-${Date.now()}`,
+          name: record.name,
+          gender: record.gender,
+          disability,
+          county: record.county,
+          subCounty: record.subCounty,
+          facility: record.facility,
+          designation: record.designation,
+          phone: record.phone,
+          supportNeeded: record.supportNeeded || "",
+          idNo: record.idNo,
+          dob: record.dob,
+          dateEmployed: record.dateEmployed,
+          educationLevel: record.educationLevel,
+          qualification: record.qualification,
+          regulatoryBody: record.regulatoryBody,
+        });
+      }
       reset();
       onSuccess?.();
       onOpenChange(false);
@@ -280,6 +304,30 @@ export function NewWorkerModal({
                 className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               />
             </div>
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">
+                Work Email
+              </label>
+              <input
+                type="email"
+                value={workEmail}
+                onChange={(e) => setWorkEmail(e.target.value)}
+                placeholder="name@chak.org"
+                className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">
+                Personal Email
+              </label>
+              <input
+                type="email"
+                value={personalEmail}
+                onChange={(e) => setPersonalEmail(e.target.value)}
+                placeholder="name@gmail.com"
+                className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              />
+            </div>
           </div>
 
           {/* Category / Employment Type / Project — sits right after ID Number */}
@@ -315,15 +363,15 @@ export function NewWorkerModal({
             </div>
             <div>
               <label className="text-sm font-medium mb-1.5 block">
-                Employment Type
+                Contract Type
               </label>
               <select
                 value={employmentType}
                 onChange={(e) => setEmploymentType(e.target.value)}
                 className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
-                <option value="">Select employment type</option>
-                {EMPLOYMENT_TYPES.map((t) => (
+                <option value="">Select contract type</option>
+                {CONTRACT_TYPES.map((t) => (
                   <option key={t} value={t}>
                     {t}
                   </option>
@@ -487,12 +535,18 @@ export function NewWorkerModal({
               <label className="text-sm font-medium mb-1.5 block">
                 Education Level
               </label>
-              <input
+              <select
                 value={educationLevel}
                 onChange={(e) => setEducationLevel(e.target.value)}
-                placeholder="e.g. Diploma, Degree"
-                className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              />
+                className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+                <option value="">Select education level</option>
+                {EDUCATION_LEVELS.map((l) => (
+                  <option key={l} value={l}>
+                    {l}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="text-sm font-medium mb-1.5 block">
@@ -520,12 +574,18 @@ export function NewWorkerModal({
               <label className="text-sm font-medium mb-1.5 block">
                 Regulatory Body
               </label>
-              <input
+              <select
                 value={regulatoryBody}
                 onChange={(e) => setRegulatoryBody(e.target.value)}
-                placeholder="e.g. Health Records and Information Managers Board"
-                className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              />
+                className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+                <option value="">Select regulatory body</option>
+                {REGULATORY_BODIES.map((b) => (
+                  <option key={b} value={b}>
+                    {b}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="text-sm font-medium mb-1.5 block">
@@ -549,6 +609,46 @@ export function NewWorkerModal({
                 className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               />
             </div>
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">
+                Disability
+              </label>
+              <select
+                value={disability}
+                onChange={(e) => {
+                  setDisability(e.target.value);
+                  // Clear the accommodation when no disability is declared.
+                  if (!e.target.value) setSupportNeeded("");
+                }}
+                className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+                <option value="">None declared</option>
+                {DISABILITY_TYPES.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {disability && (
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">
+                  Support Needed
+                </label>
+                <input
+                  list="support-needed-options"
+                  value={supportNeeded}
+                  onChange={(e) => setSupportNeeded(e.target.value)}
+                  placeholder="Accommodations required"
+                  className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                />
+                <datalist id="support-needed-options">
+                  {SUPPORT_SUGGESTIONS.map((s) => (
+                    <option key={s} value={s} />
+                  ))}
+                </datalist>
+              </div>
+            )}
           </div>
           {error && (
             <p

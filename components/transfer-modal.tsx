@@ -18,6 +18,7 @@ import {
   rosterFacilities,
   rosterAllFacilities,
 } from "@/lib/facility-roster";
+import { PROJECTS } from "@/lib/hr-options";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -40,6 +41,7 @@ interface TransferModalProps {
     county?: string;
     station?: string;
     designation?: string;
+    project?: string;
   };
 }
 
@@ -72,6 +74,10 @@ export function TransferModal({
   );
   const [reason, setReason] = React.useState("");
   const [designation, setDesignation] = React.useState("");
+  // Project (programme) transfer — a worker can move from one project to
+  // another without changing office / facility.
+  const [fromProject, setFromProject] = React.useState("");
+  const [toProject, setToProject] = React.useState("");
 
   // From-facility options keep the employee's current station selectable, so we
   // union the stations currently in use with the full JTP roster.
@@ -94,6 +100,7 @@ export function TransferModal({
       setFromCounty(preselectedEmployee.county || "");
       setFromFacility(preselectedEmployee.station || "");
       setDesignation(preselectedEmployee.designation || "");
+      setFromProject(preselectedEmployee.project || "");
     }
   }, [preselectedEmployee]);
 
@@ -106,6 +113,8 @@ export function TransferModal({
     setTransferDate(toInputDate(new Date().toISOString()));
     setReason("");
     setDesignation("");
+    setFromProject("");
+    setToProject("");
   };
 
   React.useEffect(() => {
@@ -125,11 +134,20 @@ export function TransferModal({
       setFromCounty(emp.county || "");
       setFromFacility(emp.station || "");
       setDesignation(emp.designation || "");
+      setFromProject(emp.project || "");
     }
   }, [employeeName, employeesData]);
 
+  // A transfer is valid either as a location move (county + facility) or as a
+  // project move (destination project chosen).
+  const isProjectTransfer = !!toProject && !toCounty && !toFacility;
+  const canSubmit =
+    !!employeeName &&
+    (!!toProject || (!!toCounty && !!toFacility)) &&
+    (!isProjectTransfer || toProject !== fromProject);
+
   const handleSubmit = () => {
-    if (!employeeName || !toCounty || !toFacility) return;
+    if (!canSubmit) return;
     const record: TransferRecord = {
       id: `transfer-${Date.now()}`,
       employeeName,
@@ -139,6 +157,8 @@ export function TransferModal({
       toFacility,
       fromSubCounty: "",
       toSubCounty: "",
+      fromProject,
+      toProject,
       designation,
       transferDate: transferDate || new Date().toISOString(),
       reason,
@@ -204,7 +224,10 @@ export function TransferModal({
               <label className="text-sm font-medium mb-1.5 block">
                 From County
               </label>
-              <Select value={fromCounty} onValueChange={setFromCounty}>
+              <Select
+                value={fromCounty}
+                onValueChange={(v) => setFromCounty(v ?? "")}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select county" />
                 </SelectTrigger>
@@ -226,7 +249,7 @@ export function TransferModal({
               <Select
                 value={toCounty}
                 onValueChange={(v) => {
-                  setToCounty(v);
+                  setToCounty(v ?? "");
                   setToFacility("");
                 }}
               >
@@ -248,7 +271,10 @@ export function TransferModal({
               <label className="text-sm font-medium mb-1.5 block">
                 From Facility
               </label>
-              <Select value={fromFacility} onValueChange={setFromFacility}>
+              <Select
+                value={fromFacility}
+                onValueChange={(v) => setFromFacility(v ?? "")}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select facility" />
                 </SelectTrigger>
@@ -270,7 +296,7 @@ export function TransferModal({
               <Select
                 value={toFacility}
                 disabled={!toCounty}
-                onValueChange={setToFacility}
+                onValueChange={(v) => setToFacility(v ?? "")}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select county first" />
@@ -283,6 +309,59 @@ export function TransferModal({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+          </div>
+
+          {/* Project transfer — move a worker from one project to another */}
+          <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-3">
+            <div>
+              <p className="text-sm font-semibold">Project Transfer</p>
+              <p className="text-xs text-muted-foreground">
+                Move this worker from one project to another (no county /
+                facility change needed).
+              </p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">
+                  From Project
+                </label>
+                <Select
+                  value={fromProject}
+                  onValueChange={(v) => setFromProject(v ?? "")}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select current project" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PROJECTS.map((p) => (
+                      <SelectItem key={p} value={p}>
+                        {p}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">
+                  To Project
+                </label>
+                <Select
+                  value={toProject}
+                  onValueChange={(v) => setToProject(v ?? "")}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select new project" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PROJECTS.filter((p) => p !== fromProject).map((p) => (
+                      <SelectItem key={p} value={p}>
+                        {p}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 
@@ -320,7 +399,7 @@ export function TransferModal({
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={!employeeName || !toCounty || !toFacility}
+              disabled={!canSubmit}
               className="gap-2"
             >
               <ArrowLeftRight className="h-4 w-4" />

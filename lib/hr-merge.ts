@@ -1,4 +1,5 @@
 import { Employee, Layworker, getExcelData } from "@/lib/excel-data";
+import { normalizeCategory } from "@/lib/hr-options";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
@@ -130,6 +131,7 @@ function applyEdit(emp: Employee, edit: any): Employee {
     if (edit.license.validUntil) next.validUntil = edit.license.validUntil;
   }
   if (edit?.endOfContract) next.contractEnd = edit.endOfContract;
+  if (edit?.category) next.category = edit.category;
   if (typeof edit?.isDeparted === "boolean") next.isDeparted = edit.isDeparted;
   if (edit?.exitReason) (next as any).exitReason = edit.exitReason;
   if (edit?.exitDate) (next as any).exitDate = edit.exitDate;
@@ -165,12 +167,16 @@ function newWorkerToEmployee(w: any): Employee {
     contractEnd: w?.contractEnd || undefined,
     phone: w?.phone,
     idNo: w?.idNo,
+    workEmail: w?.workEmail || undefined,
+    personalEmail: w?.personalEmail || undefined,
     educationLevel: w?.educationLevel || undefined,
     qualification: w?.qualification || undefined,
     regulatoryBody: w?.regulatoryBody || undefined,
     practiseeLicence: w?.licenceNo || undefined,
     dateEmployed: w?.dateEmployed,
     dob: w?.dob || undefined,
+    disability: w?.disability || undefined,
+    supportNeeded: w?.supportNeeded || undefined,
     isDeparted: false,
   };
 }
@@ -188,6 +194,8 @@ export async function getMergedData(): Promise<MergedData | null> {
   const changes = await fetchChanges();
   const newWorkers: Employee[] = [];
   const editsByName: Record<string, any> = {};
+  // Latest project transfer per employee (rows arrive newest-first).
+  const projectByName: Record<string, string> = {};
 
   for (const row of changes) {
     const data = row?.data;
@@ -196,6 +204,15 @@ export async function getMergedData(): Promise<MergedData | null> {
       newWorkers.push(newWorkerToEmployee(data));
     } else if (row.change_type === "employee_edit" && row.ref_id) {
       editsByName[row.ref_id] = data;
+    } else if (
+      row.change_type === "transfer" &&
+      data?.employeeName &&
+      data?.toProject
+    ) {
+      // Only the most recent transfer wins for a given employee.
+      if (!(data.employeeName in projectByName)) {
+        projectByName[data.employeeName] = data.toProject;
+      }
     }
   }
 
@@ -225,7 +242,11 @@ export async function getMergedData(): Promise<MergedData | null> {
     }
   }
 
-  const employees = [...active, ...newWorkers, ...rehired];
+  const employees = [...active, ...newWorkers, ...rehired].map((emp) =>
+    projectByName[emp.name]
+      ? { ...emp, project: projectByName[emp.name] }
+      : emp,
+  );
   const designationGroups = [
     ...new Set(
       employees
@@ -239,10 +260,18 @@ export async function getMergedData(): Promise<MergedData | null> {
     ),
   ];
 
+  // Normalise the category on every record (employees, departed, layworkers)
+  // so the dashboard "View data by category" filter can rely on it existing.
+  const withCategory = <T extends { category?: string }>(list: T[]): T[] =>
+    list.map((item) => ({
+      ...item,
+      category: normalizeCategory(item.category),
+    }));
+
   return {
-    employees,
-    departed: remainingDeparted,
-    layworkers: base.layworkers,
+    employees: withCategory(employees),
+    departed: withCategory(remainingDeparted),
+    layworkers: withCategory(base.layworkers),
     summary: {
       totalEmployees: employees.length,
       totalDeparted: remainingDeparted.length,

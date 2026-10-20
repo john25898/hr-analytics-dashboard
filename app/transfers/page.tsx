@@ -101,6 +101,7 @@ export default function TransfersPage() {
                     <TableHead>Employee</TableHead>
                     <TableHead>From</TableHead>
                     <TableHead>To</TableHead>
+                    <TableHead>Project</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Reason</TableHead>
                   </TableRow>
@@ -134,6 +135,22 @@ export default function TransfersPage() {
                             </span>
                           )}
                         </div>
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {t.toProject ? (
+                          <div className="flex flex-col">
+                            <span className="font-medium text-emerald-700">
+                              {t.toProject}
+                            </span>
+                            {t.fromProject && (
+                              <span className="text-xs text-muted-foreground">
+                                from {t.fromProject}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
                       </TableCell>
                       <TableCell className="text-sm">
                         {formatDate(t.transferDate)}

@@ -12,6 +12,13 @@ import {
 } from "@/components/ui/table";
 import { Employee } from "@/lib/excel-data";
 import { getEmployeeEdit } from "@/lib/employee-store";
+import { normalizeCategory } from "@/lib/hr-options";
+
+const CATEGORY_BADGE_CLASSES: Record<string, string> = {
+  HRH: "bg-blue-50 text-blue-700 border-blue-200",
+  CHAK: "bg-violet-50 text-violet-700 border-violet-200",
+  CBSL: "bg-teal-50 text-teal-700 border-teal-200",
+};
 
 interface EmployeesTableProps {
   employees: Employee[];
@@ -90,6 +97,7 @@ export function EmployeesTable({
           <TableRow>
             <TableHead className="font-semibold">Name</TableHead>
             <TableHead className="font-semibold">Gender</TableHead>
+            <TableHead className="font-semibold">Category</TableHead>
             <TableHead className="font-semibold">Age</TableHead>
             <TableHead className="font-semibold">Designation</TableHead>
             <TableHead className="font-semibold">County</TableHead>
@@ -128,6 +136,23 @@ export function EmployeesTable({
                 </TableCell>
                 <TableCell>
                   {getGenderBadge(employee.gender as string)}
+                </TableCell>
+                <TableCell>
+                  {(() => {
+                    const value = normalizeCategory(
+                      edit?.category || employee.category,
+                    );
+                    return (
+                      <span
+                        className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-wide ${
+                          CATEGORY_BADGE_CLASSES[value] ||
+                          CATEGORY_BADGE_CLASSES.HRH
+                        }`}
+                      >
+                        {value}
+                      </span>
+                    );
+                  })()}
                 </TableCell>
                 <TableCell className="text-sm">
                   {getEmployeeAge(employee) !== null ? (

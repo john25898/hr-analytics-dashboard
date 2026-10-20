@@ -18,8 +18,14 @@ import { EmployeeEditModal } from "@/components/employee-edit-modal";
 import { Button } from "@/components/ui/button";
 import { NewWorkerModal } from "@/components/new-worker-modal";
 import { pullChangesFromBackend } from "@/lib/employee-store";
+import { CATEGORIES } from "@/lib/hr-options";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+// Pills read HRH -> CHAK -> CBSL (HRH first because it is the default).
+const CATEGORY_ORDER = ["HRH", "CHAK", "CBSL"].filter((c) =>
+  CATEGORIES.includes(c),
+);
 
 export default function EmployeesPage() {
   const [selectedEmployee, setSelectedEmployee] = React.useState<any>(null);
@@ -27,13 +33,14 @@ export default function EmployeesPage() {
   const [addWorkerOpen, setAddWorkerOpen] = React.useState(false);
   const [refreshKey, setRefreshKey] = React.useState(0);
   const [filters, setFilters] = React.useState({
+    search: "",
+    category: "all",
     county: "all",
     designation: "all",
     gender: "all",
     status: "all",
     education: "all",
     regulatoryBody: "all",
-    search: "",
   });
 
   // Pull HR changes (new workers, edits, contract extensions) from the shared
@@ -52,6 +59,8 @@ export default function EmployeesPage() {
   }, []);
 
   const queryParams = new URLSearchParams();
+  if (filters.category !== "all")
+    queryParams.append("category", filters.category);
   if (filters.county !== "all") queryParams.append("county", filters.county);
   if (filters.designation !== "all")
     queryParams.append("designation", filters.designation);
@@ -77,6 +86,7 @@ export default function EmployeesPage() {
   const filterOptions = React.useMemo(() => {
     if (!analyticsData)
       return {
+        categories: [],
         counties: [],
         designations: [],
         genders: [],
@@ -84,6 +94,14 @@ export default function EmployeesPage() {
         educationLevels: [],
         regulatoryBodies: [],
       };
+
+    const categoryCounts: Record<string, number> =
+      analyticsData.categoryCounts || {};
+    const categories = CATEGORY_ORDER.map((cat) => ({
+      value: cat,
+      label: cat,
+      count: Number(categoryCounts[cat] || 0),
+    }));
 
     const counties = Object.keys(
       analyticsData.countyDistribution?.reduce((acc: any, item: any) => {
@@ -109,6 +127,7 @@ export default function EmployeesPage() {
       analyticsData.regulatoryBodies?.map((item: any) => item.name) || [];
 
     return {
+      categories,
       counties: counties.sort(),
       designations: designations.sort(),
       genders: genders.sort(),

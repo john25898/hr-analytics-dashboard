@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getMergedData } from "@/lib/hr-merge";
+import { CATEGORIES, matchesCategory } from "@/lib/hr-options";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const data = await getMergedData();
 
@@ -12,7 +13,14 @@ export async function GET() {
       );
     }
 
-    const employees = data.employees;
+    // "View data by category" filter — HRH (default) / CHAK / CBSL / all.
+    const categoryFilter = request.nextUrl.searchParams.get("category");
+    const inCategory = (record: { category?: string }) =>
+      matchesCategory(record, categoryFilter);
+
+    const employees = data.employees.filter(inCategory);
+    const departedInCategory = data.departed.filter(inCategory);
+    const layworkersInCategory = (data.layworkers || []).filter(inCategory);
 
     // Gender distribution
     const genderCount = employees.reduce(
@@ -173,16 +181,35 @@ export async function GET() {
       {} as Record<string, number>,
     );
 
+    // Employees per category — lets the UI show what each pill contains.
+    const categoryCounts: Record<string, number> = {};
+    CATEGORIES.forEach((cat) => (categoryCounts[cat] = 0));
+    data.employees.forEach((emp) => {
+      const key = emp.category || "HRH";
+      categoryCounts[key] = (categoryCounts[key] || 0) + 1;
+    });
+
     return NextResponse.json({
+      category: categoryFilter || "all",
+      categoryCounts,
       summary: {
         totalEmployees: employees.length,
-        totalDeparted: data.departed.length,
-        totalLayworkers: data.layworkers.length,
-        totalPersonnel: data.summary.totalPersonnel,
+        totalDeparted: departedInCategory.length,
+        totalLayworkers: layworkersInCategory.length,
+        totalPersonnel:
+          employees.length +
+          departedInCategory.length +
+          layworkersInCategory.length,
         expiringLicenses: expiringCount,
         expiredLicenses: expiredCount,
         validLicenses: validCount,
-        designationGroups: data.summary.designationGroups,
+        designationGroups: [
+          ...new Set(
+            employees
+              .map((e) => e.designationGroup || e.designation || "Unknown")
+              .filter(Boolean),
+          ),
+        ],
       },
       genderDistribution: Object.entries(genderCount).map(([name, value]) => ({
         name,

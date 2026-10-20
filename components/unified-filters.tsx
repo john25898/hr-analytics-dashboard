@@ -14,6 +14,12 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { X, ChevronDown, Filter } from "lucide-react";
 
+interface CategoryOption {
+  value: string;
+  label: string;
+  count?: number;
+}
+
 interface FilterOptions {
   counties?: string[];
   designations?: string[];
@@ -21,10 +27,13 @@ interface FilterOptions {
   statuses?: string[];
   educationLevels?: string[];
   regulatoryBodies?: string[];
+  /** Staff categories (HRH / CHAK / CBSL) with their record counts. */
+  categories?: CategoryOption[];
 }
 
 interface FilterState {
   search?: string;
+  category?: string;
   county?: string;
   designation?: string;
   gender?: string;
@@ -47,6 +56,7 @@ export function UnifiedFilters({
 }: UnifiedFiltersProps) {
   const [filters, setFilters] = React.useState<FilterState>({
     search: "",
+    category: "all",
     county: "all",
     designation: "all",
     gender: "all",
@@ -91,6 +101,7 @@ export function UnifiedFilters({
   const handleReset = () => {
     const resetFilters: FilterState = {
       search: "",
+      category: "all",
       county: "all",
       designation: "all",
       gender: "all",
@@ -102,6 +113,13 @@ export function UnifiedFilters({
     setActiveCount(0);
     onFilterChange(resetFilters);
   };
+
+  // Categories shown as segmented pills: All + HRH / CHAK / CBSL.
+  const categoryOptions: CategoryOption[] = React.useMemo(() => {
+    const list = options.categories || [];
+    const total = list.reduce((sum, item) => sum + (item.count || 0), 0);
+    return [{ value: "all", label: "All", count: total }, ...list];
+  }, [options.categories]);
 
   return (
     <div className="space-y-3">
@@ -144,6 +162,53 @@ export function UnifiedFilters({
       {/* Filter Content */}
       {expanded && (
         <div className="space-y-3 rounded-lg bg-card border border-border p-4">
+          {/* Category — segmented pills (HRH / CHAK / CBSL) */}
+          {categoryOptions.length > 1 && (
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-2 block">
+                Category
+              </label>
+              <div
+                role="group"
+                aria-label="Category"
+                className="inline-flex flex-wrap items-center gap-1 rounded-full bg-muted p-1"
+              >
+                {categoryOptions.map((option) => {
+                  const active = (filters.category || "all") === option.value;
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() =>
+                        handleFilterChange("category", option.value)
+                      }
+                      aria-pressed={active}
+                      disabled={isLoading}
+                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs transition-colors disabled:opacity-60 ${
+                        active
+                          ? "bg-blue-600 font-medium text-white shadow-sm"
+                          : "text-foreground/70 hover:bg-background/60 hover:text-foreground"
+                      }`}
+                    >
+                      {option.label}
+                      {typeof option.count === "number" && (
+                        <span
+                          className={`rounded-full px-1 text-[10px] tabular-nums ${
+                            active
+                              ? "bg-white/20 text-white"
+                              : "bg-background/70 text-muted-foreground"
+                          }`}
+                        >
+                          {option.count}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Search */}
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-2 block">

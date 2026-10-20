@@ -30,6 +30,8 @@ export interface EmployeeEdit {
   contractExtensions?: ContractExtension[];
   provisions?: StatutoryProvisions;
   license?: LicenseDetails;
+  // HRH | CHAK | CBSL — used by the dashboard category filter.
+  category?: string;
 }
 
 export interface DisabilityRecord {
@@ -65,6 +67,10 @@ export interface TransferRecord {
   toFacility: string;
   fromSubCounty: string;
   toSubCounty: string;
+  // Project (programme) transfer — a worker can move between projects without
+  // changing county / facility, so these are optional.
+  fromProject?: string;
+  toProject?: string;
   designation: string;
   transferDate: string;
   reason: string;
@@ -76,6 +82,9 @@ export interface NewWorkerRecord {
   gender: string;
   phone: string;
   idNo: string;
+  // Official (work) and personal email addresses.
+  workEmail?: string;
+  personalEmail?: string;
   // CHAK | HRH | CBSL
   category?: string;
   // Contract | Casual Laborer | Internship
@@ -99,6 +108,10 @@ export interface NewWorkerRecord {
   regulatoryBody: string;
   licenceNo: string;
   validUntil: string;
+  // Disability declaration captured at intake (optional).
+  disability?: string;
+  // Workplace accommodation required when a disability is declared.
+  supportNeeded?: string;
 }
 
 export interface HRModifications {

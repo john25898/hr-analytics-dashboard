@@ -24,6 +24,15 @@ export interface Employee {
   validUntil?: string;
   contractEnd?: string;
   isDeparted?: boolean;
+  // Optional HR attributes (populated for workers captured through the app)
+  category?: string;
+  employmentType?: string;
+  project?: string;
+  workstation?: string;
+  workEmail?: string;
+  personalEmail?: string;
+  disability?: string;
+  supportNeeded?: string;
   [key: string]: any;
 }
 
@@ -37,6 +46,8 @@ export interface Layworker {
   phone?: string;
   idNo?: string;
   amount?: number;
+  // HRH / CHAK / CBSL — the base roster has no column, so it defaults to HRH.
+  category?: string;
 }
 
 export interface EnrichedData {

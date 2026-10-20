@@ -25,6 +25,7 @@ import {
   FileSpreadsheet,
   LogOut,
   UserCircle2,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/auth-gate";
@@ -37,6 +38,7 @@ interface NavigationProps {
 const navItems = [
   { href: "/", label: "Dashboard", icon: BarChart3 },
   { href: "/employees", label: "Employees", icon: Users },
+  { href: "/recruitment", label: "Recruitment", icon: UserPlus },
   { href: "/compliance", label: "Compliance", icon: AlertCircle },
   { href: "/disabilities", label: "Disabilities", icon: Heart },
   { href: "/transfers", label: "Transfers", icon: ArrowLeftRight },

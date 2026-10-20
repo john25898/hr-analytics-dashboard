@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getMergedData } from "@/lib/hr-merge";
+import { matchesCategory } from "@/lib/hr-options";
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,6 +14,7 @@ export async function GET(request: NextRequest) {
     }
 
     const searchParams = request.nextUrl.searchParams;
+    const category = searchParams.get("category");
     const county = searchParams.get("county");
     const designation = searchParams.get("designation");
     const gender = searchParams.get("gender");
@@ -27,6 +29,11 @@ export async function GET(request: NextRequest) {
     let filtered = includeDeparted
       ? [...data.employees, ...data.departed]
       : [...data.employees];
+
+    // HRH / CHAK / CBSL — untagged records default to HRH.
+    if (category && category !== "all") {
+      filtered = filtered.filter((emp) => matchesCategory(emp, category));
+    }
 
     if (county && county !== "all") {
       filtered = filtered.filter((emp) => emp.county === county);

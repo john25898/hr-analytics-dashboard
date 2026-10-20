@@ -20,6 +20,9 @@ import {
   Briefcase,
   Clock,
   Heart,
+  Accessibility,
+  Mars,
+  Venus,
 } from "lucide-react";
 import { MetricCard } from "./metric-card";
 import { DashboardCharts } from "./dashboard-charts";
@@ -53,6 +56,14 @@ import {
   Cell,
 } from "recharts";
 import { NewWorkerModal } from "./new-worker-modal";
+import { CATEGORIES } from "@/lib/hr-options";
+import { getDisabilities, getModifications } from "@/lib/employee-store";
+import { cn } from "@/lib/utils";
+
+// Pills are shown HRH -> CHAK -> CBSL (HRH first because it is the default).
+const CATEGORY_ORDER = ["HRH", "CHAK", "CBSL"].filter((c) =>
+  CATEGORIES.includes(c),
+);
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 const COLOR_PALETTE = [
@@ -70,18 +81,85 @@ export function DashboardContent() {
   const router = useRouter();
   const [addWorkerOpen, setAddWorkerOpen] = React.useState(false);
   const [refreshKey, setRefreshKey] = React.useState(0);
+  // "View data by category" filter — every KPI, card and chart below is scoped
+  // to this value. HRH is the default because that is what the master roster is.
+  const [category, setCategory] = React.useState<string>("HRH");
+  // The Operations tab only exists for HRH, so the active tab is held in state
+  // and falls back to Overview whenever the category changes.
+  const [tab, setTab] = React.useState("overview");
+  React.useEffect(() => {
+    if (category !== "HRH")
+      setTab((t) => (t === "operations" ? "overview" : t));
+  }, [category]);
+
   // refreshKey is part of the SWR keys so bumping it forces a live refetch —
   // without it the dashboard kept stale numbers until a full browser refresh.
+  // keepPreviousData stops the whole grid flashing a skeleton on every switch.
   const { data: analytics, isLoading } = useSWR(
-    `/api/analytics?_=${refreshKey}`,
+    `/api/analytics?category=${category}&_=${refreshKey}`,
     fetcher,
+    { keepPreviousData: true },
   );
   const { data: employees } = useSWR(
-    `/api/employees?limit=1000&_=${refreshKey}`,
+    `/api/employees?limit=1000&category=${category}&_=${refreshKey}`,
     fetcher,
+    { keepPreviousData: true },
   );
 
   const refresh = () => setRefreshKey((k) => k + 1);
+
+  // ===== DISABILITY REGISTER (client-side store) =====
+  // Declared disabilities live in the employee store, not in the Excel roster,
+  // so they are counted per category here: workers captured through the intake
+  // form keep their own category, while county/facility register entries belong
+  // to the HRH master roster.
+  const [disabledCounts, setDisabledCounts] = React.useState<
+    Record<string, number>
+  >({ HRH: 0, CHAK: 0, CBSL: 0 });
+
+  React.useEffect(() => {
+    const counts: Record<string, number> = { HRH: 0, CHAK: 0, CBSL: 0 };
+    const counted = new Set<string>();
+    const keyOf = (name?: string) => (name || "").trim().toLowerCase();
+    const bump = (cat: string | undefined, name?: string) => {
+      const key = keyOf(name);
+      if (key) {
+        if (counted.has(key)) return; // never count the same worker twice
+        counted.add(key);
+      }
+      const target = cat && counts[cat] !== undefined ? cat : "HRH";
+      counts[target] += 1;
+    };
+
+    // 1. Workers added via the intake form that declared a disability
+    const intake = getModifications().newWorkers || [];
+    const intakeCategory = new Map<string, string>();
+    intake.forEach((w) => {
+      if (keyOf(w.name)) intakeCategory.set(keyOf(w.name), w.category || "HRH");
+      if (w.disability) bump(w.category, w.name);
+    });
+
+    // 2. The disabilities registry (county / facility based => HRH roster)
+    getDisabilities().forEach((r) =>
+      bump(intakeCategory.get(keyOf(r.name)) || "HRH", r.name),
+    );
+
+    setDisabledCounts(counts);
+  }, [refreshKey]);
+
+  // Gender split for the selected category (the roster stores M / F).
+  const genderSplit = React.useMemo(() => {
+    const dist: { name: string; value: number }[] =
+      analytics?.genderDistribution || [];
+    let male = 0;
+    let female = 0;
+    dist.forEach((g) => {
+      const name = String(g.name || "").toLowerCase();
+      if (name.startsWith("m")) male += Number(g.value) || 0;
+      else if (name.startsWith("f")) female += Number(g.value) || 0;
+    });
+    return { male, female };
+  }, [analytics?.genderDistribution]);
 
   // ===== OPERATIONS DATA (moved before isLoading check to keep hooks consistent) =====
   const subCountyStats = React.useMemo(() => {
@@ -216,17 +294,37 @@ export function DashboardContent() {
       : 0;
 
   const metrics = [
+    // Headcount cards belong to the HRH (county) roster only — CHAK and CBSL
+    // are facility-seconded staff with no layworker complement, so those two
+    // cards are dropped there and Total Personnel leads the row instead.
+    ...(category === "HRH"
+      ? [
+          {
+            title: "Total Employees",
+            value: analytics?.summary?.totalEmployees || 0,
+            icon: <Users className="h-6 w-6" />,
+            description: "Professional staff members",
+          },
+          {
+            title: "Total Layworkers",
+            value: analytics?.summary?.totalLayworkers || 0,
+            icon: <Users2 className="h-6 w-6" />,
+            description: "Casual & temporary staff",
+          },
+        ]
+      : [
+          {
+            title: "Total Personnel",
+            value: totalPersonnel,
+            icon: <Users className="h-6 w-6" />,
+            change: "Professional staff members",
+          },
+        ]),
     {
-      title: "Total Employees",
-      value: analytics?.summary?.totalEmployees || 0,
-      icon: <Users className="h-6 w-6" />,
-      description: "Professional staff members",
-    },
-    {
-      title: "Total Layworkers",
-      value: analytics?.summary?.totalLayworkers || 0,
-      icon: <Users2 className="h-6 w-6" />,
-      description: "Casual & temporary staff",
+      title: "License Status",
+      value: validLicenses,
+      icon: <Award className="h-6 w-6 text-sky-600" />,
+      change: `${analytics?.summary?.expiringLicenses || 0} expiring · ${expiredLicenses} expired`,
     },
     {
       title: "License Alerts",
@@ -239,6 +337,23 @@ export function DashboardContent() {
       value: `${complianceRate}%`,
       icon: <BarChart3 className="h-6 w-6 text-green-600" />,
       change: `${validLicenses} valid licenses`,
+    },
+    {
+      title: "Male / Female",
+      value: `${genderSplit.male} / ${genderSplit.female}`,
+      icon: (
+        <div className="flex items-center gap-1">
+          <Mars className="h-6 w-6 text-blue-600" />
+          <Venus className="h-6 w-6 text-pink-600" />
+        </div>
+      ),
+      change: `${genderSplit.male} male · ${genderSplit.female} female`,
+    },
+    {
+      title: "Total Disabled",
+      value: disabledCounts[category] ?? 0,
+      icon: <Accessibility className="h-6 w-6 text-violet-600" />,
+      change: "with a declared disability",
     },
   ];
 
@@ -273,6 +388,38 @@ export function DashboardContent() {
         </Button>
       </div>
 
+      {/* Category filter — scopes every metric, card and chart below */}
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="text-sm text-muted-foreground">
+          View data by category:
+        </span>
+        <div
+          role="group"
+          aria-label="View data by category"
+          className="inline-flex items-center gap-1 rounded-full bg-muted p-1"
+        >
+          {CATEGORY_ORDER.map((cat) => {
+            const active = category === cat;
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setCategory(cat)}
+                aria-pressed={active}
+                className={cn(
+                  "rounded-full px-4 py-1.5 text-sm transition-colors",
+                  active
+                    ? "bg-blue-600 font-medium text-white shadow-sm"
+                    : "text-foreground/70 hover:bg-background/60 hover:text-foreground",
+                )}
+              >
+                {cat}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Metrics */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {metrics.map((metric, idx) => (
@@ -280,37 +427,43 @@ export function DashboardContent() {
         ))}
       </div>
 
-      {/* Quick Stats Row */}
+      {/* Quick Stats Row — Total Personnel is a top KPI card for CHAK / CBSL,
+          so it is only repeated here for the HRH roster. */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Total Personnel
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalPersonnel}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Employees + Layworkers
-            </p>
-          </CardContent>
-        </Card>
+        {category === "HRH" && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Total Personnel
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalPersonnel}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Employees + Layworkers
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-indigo-600" />
-              Sub-Counties
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{subCountyStats.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              operational regions
-            </p>
-          </CardContent>
-        </Card>
+        {/* Sub-county coverage only applies to the HRH roster. */}
+        {category === "HRH" && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-indigo-600" />
+                Sub-Counties
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{subCountyStats.length}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                operational regions
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader className="pb-3">
@@ -341,12 +494,24 @@ export function DashboardContent() {
         </Card>
       </div>
 
-      {/* Charts Tabs - Overview / Analytics / Operations / Insights */}
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full max-w-2xl grid-cols-4">
+      {/* Charts Tabs — Overview / Analytics / Operations / Insights.
+          Operations is HRH-only, so CHAK and CBSL get three tabs. */}
+      <Tabs
+        value={tab}
+        onValueChange={(value) => setTab((value as string) || "overview")}
+        className="w-full"
+      >
+        <TabsList
+          className={cn(
+            "grid w-full max-w-2xl",
+            category === "HRH" ? "grid-cols-4" : "grid-cols-3",
+          )}
+        >
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="operations">Operations</TabsTrigger>
+          {category === "HRH" && (
+            <TabsTrigger value="operations">Operations</TabsTrigger>
+          )}
           <TabsTrigger value="insights">Insights</TabsTrigger>
         </TabsList>
 
@@ -449,7 +614,9 @@ export function DashboardContent() {
                   {totalEmployees + totalLayworkers}
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {totalEmployees} + {totalLayworkers} layworkers
+                  {category === "HRH"
+                    ? `${totalEmployees} + ${totalLayworkers} layworkers`
+                    : `${totalEmployees} professional staff`}
                 </p>
               </CardContent>
             </Card>
@@ -499,122 +666,135 @@ export function DashboardContent() {
           </div>
         </TabsContent>
 
-        {/* OPERATIONS TAB */}
-        <TabsContent value="operations" className="space-y-4 pt-4">
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Sub-Counties
-                </CardTitle>
-                <MapPin className="h-5 w-5 text-primary" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {subCountyStats.length}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  operational regions
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Facilities
-                </CardTitle>
-                <Building2 className="h-5 w-5 text-blue-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{facilityStats.length}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  operational stations
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Total Staff
-                </CardTitle>
-                <Users className="h-5 w-5 text-green-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {employees?.data?.length || 0}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  distributed across regions
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+        {/* OPERATIONS TAB — HRH roster only (no sub-counties in CHAK / CBSL) */}
+        {category === "HRH" && (
+          <TabsContent value="operations" className="space-y-4 pt-4">
+            <div className="grid gap-4 md:grid-cols-3">
+              {/* Sub-county coverage only applies to the HRH roster. */}
+              {category === "HRH" && (
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      Sub-Counties
+                    </CardTitle>
+                    <MapPin className="h-5 w-5 text-primary" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {subCountyStats.length}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      operational regions
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Facilities
+                  </CardTitle>
+                  <Building2 className="h-5 w-5 text-blue-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {facilityStats.length}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    operational stations
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Total Staff
+                  </CardTitle>
+                  <Users className="h-5 w-5 text-green-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {employees?.data?.length || 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    distributed across regions
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            {/* Sub-County Chart */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Staff by Sub-County</CardTitle>
-                <CardDescription>Top sub-counties by headcount</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={250}>
-                  <BarChart
-                    data={subCountyStats}
-                    layout="vertical"
-                    margin={{ top: 5, right: 20, left: 80, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" />
-                    <YAxis
-                      dataKey="name"
-                      type="category"
-                      width={70}
-                      tick={{ fontSize: 10 }}
-                    />
-                    <Tooltip />
-                    <Bar dataKey="staff" fill="#6366f1" radius={[0, 6, 6, 0]}>
-                      {subCountyStats.map((_: any, idx: number) => (
-                        <Cell
-                          key={idx}
-                          fill={COLOR_PALETTE[idx % COLOR_PALETTE.length]}
-                        />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
+            <div className="grid gap-4 md:grid-cols-2">
+              {/* Sub-County Chart */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Staff by Sub-County</CardTitle>
+                  <CardDescription>
+                    Top sub-counties by headcount
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <BarChart
+                      data={subCountyStats}
+                      layout="vertical"
+                      margin={{ top: 5, right: 20, left: 80, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis type="number" />
+                      <YAxis
+                        dataKey="name"
+                        type="category"
+                        width={70}
+                        tick={{ fontSize: 10 }}
+                      />
+                      <Tooltip />
+                      <Bar dataKey="staff" fill="#6366f1" radius={[0, 6, 6, 0]}>
+                        {subCountyStats.map((_: any, idx: number) => (
+                          <Cell
+                            key={idx}
+                            fill={COLOR_PALETTE[idx % COLOR_PALETTE.length]}
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
 
-            {/* Facility Chart */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Staff by Facility</CardTitle>
-                <CardDescription>Top facilities by headcount</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={250}>
-                  <BarChart
-                    data={facilityStats}
-                    layout="vertical"
-                    margin={{ top: 5, right: 20, left: 100, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" />
-                    <YAxis
-                      dataKey="name"
-                      type="category"
-                      width={90}
-                      tick={{ fontSize: 10 }}
-                    />
-                    <Tooltip />
-                    <Bar dataKey="staff" fill="#10b981" radius={[0, 6, 6, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
+              {/* Facility Chart */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Staff by Facility</CardTitle>
+                  <CardDescription>Top facilities by headcount</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <BarChart
+                      data={facilityStats}
+                      layout="vertical"
+                      margin={{ top: 5, right: 20, left: 100, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis type="number" />
+                      <YAxis
+                        dataKey="name"
+                        type="category"
+                        width={90}
+                        tick={{ fontSize: 10 }}
+                      />
+                      <Tooltip />
+                      <Bar
+                        dataKey="staff"
+                        fill="#10b981"
+                        radius={[0, 6, 6, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        )}
 
         {/* INSIGHTS TAB */}
         <TabsContent value="insights" className="space-y-4 pt-4">
