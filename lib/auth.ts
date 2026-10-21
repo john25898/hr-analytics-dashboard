@@ -1,4 +1,4 @@
-// Lightweight credential auth for the UJTP HR Management System.
+// Lightweight credential auth for the CHAK HR management system.
 // Mirrors the CHAK/CMaT enterprise login: validates against the official
 // roster credentials so Patrick (HR) and Program HR can sign in securely.
 

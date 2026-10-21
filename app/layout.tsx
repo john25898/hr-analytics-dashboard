@@ -4,7 +4,7 @@ import { DataSync } from "@/components/data-sync";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "HR Management System | UJTP",
+  title: "CHAK HR management",
   description:
     "Professional HR employee management and compliance tracking system",
   generator: "v0.app",
