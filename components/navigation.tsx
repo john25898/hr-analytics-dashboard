@@ -78,7 +78,7 @@ export function Navigation({ open, onOpenChange }: NavigationProps) {
           {/* Header */}
           <div className="flex items-center justify-between border-b border-border px-6 py-4">
             <h1 className="text-xl font-bold text-sidebar-foreground">
-              CHAK HR
+              CHAK HRMS
             </h1>
             <Button
               variant="ghost"
@@ -139,7 +139,7 @@ export function Navigation({ open, onOpenChange }: NavigationProps) {
               <LogOut className="h-3.5 w-3.5" />
               Sign out
             </button>
-            <p className="mt-3">CHAK HR management</p>
+            <p className="mt-3">CHAK HRMS</p>
             <p className="mt-1">Employee Management System</p>
           </div>
         </div>

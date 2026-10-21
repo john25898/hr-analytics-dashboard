@@ -73,7 +73,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             <HeartPulse className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-white">
-            CHAK HR management
+            CHAK HRMS
           </h1>
           <p className="mt-2 text-sm text-emerald-100/70">
             Human Resources for Health — Employee &amp; Leave Management

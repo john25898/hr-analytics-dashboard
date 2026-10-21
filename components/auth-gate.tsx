@@ -53,7 +53,7 @@ export function AuthGate({ children }: AuthGateProps) {
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-emerald-950 via-teal-900 to-cyan-900">
         <div className="flex items-center gap-3 text-emerald-100/70">
           <span className="h-5 w-5 animate-spin rounded-full border-2 border-emerald-400/30 border-t-emerald-400" />
-          <span className="text-sm">Loading CHAK HR…</span>
+          <span className="text-sm">Loading CHAK HRMS…</span>
         </div>
       </div>
     );
