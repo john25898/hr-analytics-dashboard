@@ -21,18 +21,22 @@ import { mutate } from "swr";
  */
 const REVALIDATE_DELAY_MS = 250;
 const POLL_INTERVAL_MS = 120_000;
-// Ignore repeated sync events that arrive while a revalidation is in flight.
-// This used to be 1.5s, which let an embedded browser (VS Code webview, or any
-// iframe) re-fetch /api/employees + /api/analytics on every single click, since
-// such browsers fire a `focus` event on each interaction. 60s is enough to pick
-// up other people's edits without the dashboard appearing to "refresh" itself.
+// Ignore repeated *background* sync events that arrive while a revalidation is
+// in flight. This used to be 1.5s, which let an embedded browser (VS Code
+// webview, or any iframe) re-fetch /api/employees + /api/analytics on every
+// single click, since such browsers fire a `focus` event on each interaction.
+// 60s is enough to pick up other people's edits without the dashboard
+// appearing to "refresh" itself.
+//
+// Saves made by THIS user must not be throttled (see `force`), otherwise the
+// employee count stayed stale after adding a worker for up to a minute.
 const MIN_GAP_MS = 60_000;
 
 let lastRevalidateAt = 0;
 
-function revalidateApiKeys() {
+function revalidateApiKeys(force = false) {
   const now = Date.now();
-  if (now - lastRevalidateAt < MIN_GAP_MS) return Promise.resolve();
+  if (!force && now - lastRevalidateAt < MIN_GAP_MS) return Promise.resolve();
   lastRevalidateAt = now;
   return mutate(
     (key) => typeof key === "string" && key.startsWith("/api/"),
@@ -45,8 +49,9 @@ export function DataSync() {
   useEffect(() => {
     const onSynced = () => {
       // Slight delay lets the backend upsert fully settle before re-reading.
+      // Forced: this is a change the user just made, so it must show up now.
       window.setTimeout(() => {
-        void revalidateApiKeys();
+        void revalidateApiKeys(true);
       }, REVALIDATE_DELAY_MS);
     };
 

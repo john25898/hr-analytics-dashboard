@@ -9,6 +9,9 @@ __v0_jsx-dev-runtime.ts
 # Environment variables
 .env*.local
 
+# Server-side change store fallback (written when Supabase is not configured)
+.data/
+
 # Common ignores
 node_modules
 .next/

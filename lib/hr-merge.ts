@@ -1,16 +1,6 @@
 import { Employee, Layworker, getExcelData } from "@/lib/excel-data";
 import { normalizeCategory } from "@/lib/hr-options";
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
-const TABLE = "hr_employee_changes";
-
-interface HRChangeRow {
-  id: string;
-  change_type: string;
-  ref_id: string | null;
-  data: any;
-}
+import { readAllChanges, type HRChangeRow } from "@/lib/server/hr-store";
 
 export interface MergedData {
   employees: Employee[];
@@ -26,23 +16,15 @@ export interface MergedData {
   };
 }
 
-/** Fetch all change rows from the shared Supabase backend (best-effort). */
+/**
+ * Fetch all change rows from the shared change store (Supabase when configured,
+ * otherwise the server-side change file). File rows are returned too, so a
+ * worker added while no Supabase project is configured still shows up in every
+ * list and KPI.
+ */
 async function fetchChanges(): Promise<HRChangeRow[]> {
   try {
-    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return [];
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/${TABLE}?select=id,change_type,ref_id,data&order=updated_at.desc`,
-      {
-        headers: {
-          apikey: SUPABASE_ANON_KEY,
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        },
-        cache: "no-store",
-      },
-    );
-    if (!res.ok) return [];
-    const rows = await res.json();
-    return Array.isArray(rows) ? rows : [];
+    return await readAllChanges();
   } catch {
     return [];
   }

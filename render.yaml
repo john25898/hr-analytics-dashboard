@@ -15,9 +15,13 @@ services:
       # GC aggressively instead of being OOM-killed.
       - key: NODE_OPTIONS
         value: --max-old-space-size=450
-      # Optional: only needed if you revive the Supabase leave-sync backend.
-      # The app runs fine without them (sync features degrade gracefully).
-      # - key: NEXT_PUBLIC_SUPABASE_URL
-      #   sync: false
-      # - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
-      #   sync: false
+      # Shared change store (new workers, edits, transfers, leave, recruitment).
+      # `sync: false` means the values are NOT stored in the repo — set them in
+      # the Render dashboard (Environment tab). If they are left empty the app
+      # still works: lib/server/hr-store.ts falls back to a JSON file on the
+      # instance, but that is per-instance and lost on redeploy, so configure
+      # these for durable, multi-user persistence.
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false

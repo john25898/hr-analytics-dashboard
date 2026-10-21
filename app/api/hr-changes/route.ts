@@ -1,118 +1,62 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  backendMode,
+  readAllChanges,
+  removeChange,
+  saveChanges,
+} from "@/lib/server/hr-store";
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
-const TABLE = "hr_employee_changes";
+// The change store may touch the filesystem (fallback backend) — always run on
+// the Node.js runtime.
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
-// GET: pull all HR changes (new workers, edits, contract extensions,
-// disabilities, transfers) from the shared backend. Each row stores the full
-// record in `data` (JSONB) so both apps keep their own shape. If the table
-// hasn't been created yet (run supabase-hr-migration.sql) we return empty
-// gracefully — the dashboard keeps working from localStorage.
+// GET: all HR changes (new workers, edits, contract extensions, disabilities,
+// transfers). Served from Supabase when configured, otherwise from the local
+// server-side change file — either way the payload is the same shape, so the
+// client can merge it into localStorage.
 export async function GET() {
   try {
-    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-      // No shared backend configured — return empty with 200 (see staff-sync).
-      return NextResponse.json({ changes: [], total: 0, offline: true });
-    }
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/${TABLE}?select=id,change_type,ref_id,data&order=updated_at.desc`,
-      {
-        headers: {
-          apikey: SUPABASE_ANON_KEY,
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        },
-        cache: "no-store",
-      },
-    );
-
-    if (!res.ok) {
-      // 404 = table not created yet (run supabase-hr-migration.sql) — not fatal
-      if (res.status === 404) {
-        return NextResponse.json({ changes: [], total: 0, tableMissing: true });
-      }
-      return NextResponse.json(
-        { error: `Supabase error ${res.status}`, changes: [], total: 0 },
-        { status: 502 },
-      );
-    }
-
-    const rows = await res.json();
-    const changes = Array.isArray(rows) ? rows : [];
-    return NextResponse.json({ changes, total: changes.length });
+    const changes = await readAllChanges();
+    return NextResponse.json({
+      changes,
+      total: changes.length,
+      backend: backendMode(),
+    });
   } catch (err) {
-    // Backend unreachable (offline / project not provisioned) — the dashboard
-    // still works from localStorage. Return empty gracefully.
-    console.warn("hr-changes: backend unavailable, using local data:", err);
+    console.warn("hr-changes GET: store unavailable:", err);
     return NextResponse.json({ changes: [], total: 0, offline: true });
   }
 }
 
-// POST: upsert HR changes (new workers, edits, contract extensions,
-// disabilities, transfers) to the shared backend so any browser/device sees
-// the same state. Ids are `${change_type}:${ref_id}` — re-pushing the same
-// record updates it instead of duplicating.
+// POST: upsert changes by id (`${change_type}:${ref_id}`) so re-pushing the
+// same record updates it instead of duplicating.
 export async function POST(request: NextRequest) {
   try {
-    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-      // Nothing to sync to — localStorage already holds the change.
-      return NextResponse.json({ ok: false, offline: true, pushed: 0 });
-    }
     const body = await request.json();
     const changes: any[] = Array.isArray(body?.changes) ? body.changes : [];
     if (changes.length === 0) {
       return NextResponse.json({ ok: true, pushed: 0 });
     }
-
-    const rows = changes.map((c) => ({
-      id: String(
-        c.id ?? `${c.change_type ?? "change"}:${c.ref_id ?? Date.now()}`,
-      ),
-      change_type: c.change_type ?? "change",
-      ref_id: c.ref_id ?? null,
-      data: c.data ?? {},
-      updated_at: new Date().toISOString(),
-    }));
-
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?on_conflict=id`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        Prefer: "resolution=merge-duplicates,return=minimal",
-      },
-      body: JSON.stringify(rows),
-      cache: "no-store",
+    const result = await saveChanges(changes);
+    return NextResponse.json({
+      ok: result.ok,
+      pushed: result.ok ? result.stored : 0,
+      backend: result.backend,
     });
-
-    if (!res.ok) {
-      // 404 = table not created yet (run supabase-hr-migration.sql) — not
-      // fatal, the dashboard keeps working from localStorage.
-      if (res.status === 404) {
-        return NextResponse.json({ ok: false, pushed: 0, tableMissing: true });
-      }
-      return NextResponse.json(
-        { error: `Supabase error ${res.status}` },
-        { status: 502 },
-      );
-    }
-    return NextResponse.json({ ok: true, pushed: rows.length });
   } catch (err) {
-    // Backend unreachable — local data still saved; push is best-effort.
-    console.warn("hr-changes POST: backend unavailable, kept locally:", err);
-    return NextResponse.json({ ok: true, pushed: 0, offline: true });
+    console.warn("hr-changes POST: could not parse/store payload:", err);
+    return NextResponse.json(
+      { ok: false, pushed: 0, error: "bad request" },
+      { status: 400 },
+    );
   }
 }
 
-// DELETE: remove a single change from the backend (e.g. a removed disability,
-// transfer or new worker record).
+// DELETE: remove a single change (e.g. a removed disability, transfer or new
+// worker record).
 export async function DELETE(request: NextRequest) {
   try {
-    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-      // Nothing to delete remotely — localStorage is the source of truth.
-      return NextResponse.json({ ok: false, offline: true, deleted: 0 });
-    }
     const { searchParams } = new URL(request.url);
     const change_type = searchParams.get("change_type");
     const ref_id = searchParams.get("ref_id");
@@ -122,31 +66,10 @@ export async function DELETE(request: NextRequest) {
         { status: 400 },
       );
     }
-
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/${TABLE}?change_type=eq.${encodeURIComponent(
-        change_type,
-      )}&ref_id=eq.${encodeURIComponent(ref_id)}`,
-      {
-        method: "DELETE",
-        headers: {
-          apikey: SUPABASE_ANON_KEY,
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          Prefer: "return=minimal",
-        },
-        cache: "no-store",
-      },
-    );
-
-    if (!res.ok && res.status !== 404) {
-      return NextResponse.json(
-        { error: `Supabase error ${res.status}` },
-        { status: 502 },
-      );
-    }
-    return NextResponse.json({ ok: true });
+    const result = await removeChange(change_type, ref_id);
+    return NextResponse.json({ ok: result.ok, backend: result.backend });
   } catch (err) {
-    console.warn("hr-changes DELETE: backend unavailable:", err);
-    return NextResponse.json({ ok: true, deleted: 0, offline: true });
+    console.warn("hr-changes DELETE: store unavailable:", err);
+    return NextResponse.json({ ok: false, deleted: 0, offline: true });
   }
 }
