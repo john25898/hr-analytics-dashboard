@@ -110,6 +110,12 @@ export function EmployeeEditModal({
   const [licenseNo, setLicenseNo] = React.useState("");
   const [licenseValidUntil, setLicenseValidUntil] = React.useState("");
   const [transferModalOpen, setTransferModalOpen] = React.useState(false);
+  // Exit documentation dates — captured before the employee is exited.
+  const [noticeDate, setNoticeDate] = React.useState("");
+  const [exitDateInput, setExitDateInput] = React.useState("");
+  const [fullySignedDate, setFullySignedDate] = React.useState("");
+  const [certificateDate, setCertificateDate] = React.useState("");
+  const [exitDatesSaved, setExitDatesSaved] = React.useState(false);
 
   // Load existing edits when employee changes
   React.useEffect(() => {
@@ -132,6 +138,11 @@ export function EmployeeEditModal({
       setSaved(false);
       setProvisionsSaved(false);
       setLicenseSaved(false);
+      setNoticeDate(toInputDate(edit?.noticeDate));
+      setExitDateInput(toInputDate(edit?.exitDate));
+      setFullySignedDate(toInputDate(edit?.fullySignedDate));
+      setCertificateDate(toInputDate(edit?.certificateDate));
+      setExitDatesSaved(false);
     }
   }, [employee]);
 
@@ -187,11 +198,42 @@ export function EmployeeEditModal({
     if (!employee.name || !selectedReason) return;
     updateEmployeeEdit(employee.name, {
       exitReason: selectedReason as EmployeeEdit["exitReason"],
-      exitDate: new Date().toISOString(),
+      // The exit date entered above drives the departure — it is only
+      // defaulted to today when HR left the field blank.
+      exitDate: exitDateInput
+        ? new Date(exitDateInput).toISOString()
+        : new Date().toISOString(),
+      noticeDate: noticeDate ? new Date(noticeDate).toISOString() : undefined,
+      fullySignedDate: fullySignedDate
+        ? new Date(fullySignedDate).toISOString()
+        : undefined,
+      certificateDate: certificateDate
+        ? new Date(certificateDate).toISOString()
+        : undefined,
       isDeparted: true,
     });
     setConfirmExit(false);
     onOpenChange(false);
+    onEmployeeUpdated?.();
+  };
+
+  /** Persist the four exit document dates without exiting the employee yet. */
+  const handleSaveExitDates = () => {
+    if (!employee.name) return;
+    updateEmployeeEdit(employee.name, {
+      noticeDate: noticeDate ? new Date(noticeDate).toISOString() : undefined,
+      exitDate: exitDateInput
+        ? new Date(exitDateInput).toISOString()
+        : undefined,
+      fullySignedDate: fullySignedDate
+        ? new Date(fullySignedDate).toISOString()
+        : undefined,
+      certificateDate: certificateDate
+        ? new Date(certificateDate).toISOString()
+        : undefined,
+    });
+    setExitDatesSaved(true);
+    setTimeout(() => setExitDatesSaved(false), 2000);
     onEmployeeUpdated?.();
   };
 
@@ -551,12 +593,121 @@ export function EmployeeEditModal({
           </div>
 
           {/* Exit Employee Section */}
-          {!isAlreadyDeparted && (
+          {isAlreadyDeparted ? (
+            <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
+              <h4 className="font-semibold text-sm flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Exit Record
+              </h4>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <p className="text-xs text-muted-foreground">Reason</p>
+                  <p className="font-medium text-sm capitalize">
+                    {existingEdit?.exitReason || "-"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Notice Date</p>
+                  <p className="font-medium text-sm">
+                    {formatDate(existingEdit?.noticeDate)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Exit Date</p>
+                  <p className="font-medium text-sm">
+                    {formatDate(existingEdit?.exitDate)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">
+                    Date Fully Signed
+                  </p>
+                  <p className="font-medium text-sm">
+                    {formatDate(existingEdit?.fullySignedDate)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">
+                    Date of Certificate
+                  </p>
+                  <p className="font-medium text-sm">
+                    {formatDate(existingEdit?.certificateDate)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
             <div className="rounded-lg border border-red-200 bg-red-50/50 p-4 space-y-4">
               <h4 className="font-semibold text-sm flex items-center gap-2 text-red-700">
                 <AlertTriangle className="h-4 w-4" />
                 Exit Employee from Organization
               </h4>
+
+              {/* Exit documentation dates — filled in BEFORE the exit */}
+              <div className="rounded-lg border border-red-300 bg-white p-3 space-y-3">
+                <p className="text-xs font-semibold text-red-800 flex items-center gap-1.5">
+                  <FileText className="h-3.5 w-3.5" />
+                  Exit documentation dates
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Record these on the file before confirming the exit. The exit
+                  date entered here is used as the departure date.
+                </p>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {[
+                    {
+                      key: "notice",
+                      label: "Notice Date",
+                      value: noticeDate,
+                      set: setNoticeDate,
+                    },
+                    {
+                      key: "exit",
+                      label: "Exit Date",
+                      value: exitDateInput,
+                      set: setExitDateInput,
+                    },
+                    {
+                      key: "signed",
+                      label: "Date Fully Signed",
+                      value: fullySignedDate,
+                      set: setFullySignedDate,
+                    },
+                    {
+                      key: "cert",
+                      label: "Date of Certificate",
+                      value: certificateDate,
+                      set: setCertificateDate,
+                    },
+                  ].map((field) => (
+                    <div key={field.key}>
+                      <p className="text-xs text-muted-foreground mb-1.5">
+                        {field.label}
+                      </p>
+                      <Input
+                        type="date"
+                        value={field.value}
+                        onChange={(e) => field.set(e.target.value)}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleSaveExitDates}
+                    disabled={
+                      !noticeDate &&
+                      !exitDateInput &&
+                      !fullySignedDate &&
+                      !certificateDate
+                    }
+                  >
+                    {exitDatesSaved ? "✓ Saved!" : "Save Dates"}
+                  </Button>
+                </div>
+              </div>
 
               {!confirmExit ? (
                 <>
@@ -596,9 +747,19 @@ export function EmployeeEditModal({
                       }
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      This will mark the employee as departed effective today (
-                      {new Date().toLocaleDateString()})
+                      {exitDateInput
+                        ? `This will mark the employee as departed on ${formatDate(exitDateInput)}.`
+                        : "Enter the exit date above before confirming — it defaults to today if left blank."}
                     </p>
+                    <div className="mt-2 grid grid-cols-1 gap-1 text-xs text-muted-foreground sm:grid-cols-3">
+                      <span>Notice: {formatDate(noticeDate) || "-"}</span>
+                      <span>
+                        Fully signed: {formatDate(fullySignedDate) || "-"}
+                      </span>
+                      <span>
+                        Certificate: {formatDate(certificateDate) || "-"}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex gap-2">
                     <Button

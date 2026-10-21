@@ -26,6 +26,11 @@ export interface EmployeeEdit {
   endOfContract?: string;
   exitReason?: "death" | "resignation" | "retirement" | "termination" | "";
   exitDate?: string;
+  // Exit documentation dates captured before an employee leaves, so the
+  // offboarding paperwork (notice, signing, certificate) is recorded up front.
+  noticeDate?: string; // date notice was served / received
+  fullySignedDate?: string; // date the exit documents were fully signed
+  certificateDate?: string; // date the service certificate was issued
   isDeparted?: boolean;
   contractExtensions?: ContractExtension[];
   provisions?: StatutoryProvisions;

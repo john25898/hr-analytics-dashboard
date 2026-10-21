@@ -24,18 +24,21 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { EmployeeEditModal } from "@/components/employee-edit-modal";
+import { CategoryPills } from "@/components/category-pills";
 import { getEmployeeEdit } from "@/lib/employee-store";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function CompliancePage() {
+  // HRH | CHAK | CBSL — metrics and every license list follow this category.
+  const [category, setCategory] = React.useState("HRH");
   const {
     data: employees,
     isLoading: employeesLoading,
     mutate: mutateEmployees,
-  } = useSWR("/api/employees", fetcher);
+  } = useSWR(`/api/employees?category=${category}`, fetcher);
   const { data: analytics, isLoading: analyticsLoading } = useSWR(
-    "/api/analytics",
+    `/api/analytics?category=${category}`,
     fetcher,
   );
 
@@ -108,6 +111,7 @@ export default function CompliancePage() {
         <TableHeader>
           <TableRow>
             <TableHead className="font-semibold">Name</TableHead>
+            <TableHead className="font-semibold">Category</TableHead>
             <TableHead className="font-semibold">Designation</TableHead>
             <TableHead className="font-semibold">County</TableHead>
             <TableHead className="font-semibold">License No.</TableHead>
@@ -119,7 +123,7 @@ export default function CompliancePage() {
           {data.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={6}
+                colSpan={7}
                 className="text-center py-8 text-muted-foreground"
               >
                 No records found
@@ -146,6 +150,9 @@ export default function CompliancePage() {
                 >
                   <TableCell className="font-medium">
                     {emp.name || "-"}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{emp.category || "HRH"}</Badge>
                   </TableCell>
                   <TableCell className="text-sm">
                     {emp.designation || "-"}
@@ -205,6 +212,9 @@ export default function CompliancePage() {
           Monitor employee licenses and compliance status
         </p>
       </div>
+
+      {/* Category scope — HRH / CHAK / CBSL, same as the dashboard */}
+      <CategoryPills value={category} onChange={setCategory} />
 
       {/* Metrics */}
       <div className="grid gap-4 md:grid-cols-4">

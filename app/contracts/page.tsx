@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BackButton } from "@/components/back-button";
 import { EmployeeEditModal } from "@/components/employee-edit-modal";
+import { CategoryPills } from "@/components/category-pills";
 import {
   getEmployeeEdit,
   extendContract,
@@ -61,16 +62,18 @@ const CONTRACT_COLORS = ["#10b981", "#f59e0b", "#ef4444", "#3b82f6", "#8b5cf6"];
 export default function ContractsPage() {
   const [searchTerm, setSearchTerm] = React.useState("");
   const [contractFilter, setContractFilter] = React.useState("all");
+  // HRH | CHAK | CBSL — everything on the page is scoped to this category.
+  const [category, setCategory] = React.useState("HRH");
   const [refreshKey, setRefreshKey] = React.useState(0);
   const [selectedEmployee, setSelectedEmployee] = React.useState<any>(null);
   const [editModalOpen, setEditModalOpen] = React.useState(false);
 
   const { data: employees, isLoading: employeesLoading } = useSWR(
-    `/api/employees?limit=1000&includeDeparted=true&_=${refreshKey}`,
+    `/api/employees?limit=1000&includeDeparted=true&category=${category}&_=${refreshKey}`,
     fetcher,
   );
   const { data: analytics, isLoading: analyticsLoading } = useSWR(
-    `/api/analytics?_=${refreshKey}`,
+    `/api/analytics?category=${category}&_=${refreshKey}`,
     fetcher,
   );
 
@@ -265,6 +268,9 @@ export default function ContractsPage() {
           organization
         </p>
       </div>
+
+      {/* Category scope — HRH / CHAK / CBSL, same as the dashboard */}
+      <CategoryPills value={category} onChange={setCategory} />
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
@@ -537,6 +543,7 @@ export default function ContractsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
+                  <TableHead>Category</TableHead>
                   <TableHead>Designation</TableHead>
                   <TableHead>County</TableHead>
                   <TableHead>Facility</TableHead>
@@ -582,6 +589,9 @@ export default function ContractsPage() {
                     >
                       <TableCell className="font-medium">
                         {emp.name || "-"}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{emp.category || "HRH"}</Badge>
                       </TableCell>
                       <TableCell>{emp.designation || "-"}</TableCell>
                       <TableCell>{emp.county || "-"}</TableCell>
