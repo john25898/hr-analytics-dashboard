@@ -94,6 +94,26 @@ export const REGULATORY_BODIES = [
   "Other",
 ];
 
+/**
+ * Combine bodies added by HR (via the Reg Bodies page) with the built-in list.
+ * Custom entries come first so a newly added council is easy to pick in a
+ * dropdown, and duplicates are dropped case-insensitively so a name that
+ * already exists in the built-in list is not offered twice.
+ */
+export function mergeRegulatoryBodies(custom: string[] = []): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const name of [...custom, ...REGULATORY_BODIES]) {
+    const clean = String(name || "").trim();
+    if (!clean) continue;
+    const key = clean.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(clean);
+  }
+  return out;
+}
+
 // Disability categories used by the Disabilities register.
 export const DISABILITY_TYPES = [
   "Physical Impairment (Mobility)",

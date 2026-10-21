@@ -30,6 +30,7 @@ export interface EmployeeEdit {
   // offboarding paperwork (notice, signing, certificate) is recorded up front.
   noticeDate?: string; // date notice was served / received
   fullySignedDate?: string; // date the exit documents were fully signed
+  duesPaidDate?: string; // date all dues were cleared
   certificateDate?: string; // date the service certificate was issued
   isDeparted?: boolean;
   contractExtensions?: ContractExtension[];
@@ -119,11 +120,19 @@ export interface NewWorkerRecord {
   supportNeeded?: string;
 }
 
+/** A professional council / regulatory body HR has added to the list. */
+export interface RegulatoryBodyRecord {
+  id: string;
+  name: string;
+  createdAt?: string;
+}
+
 export interface HRModifications {
   employeeEdits: Record<string, EmployeeEdit>;
   disabilities: DisabilityRecord[];
   transfers: TransferRecord[];
   newWorkers: NewWorkerRecord[];
+  regulatoryBodies: RegulatoryBodyRecord[];
 }
 
 const STORAGE_KEY = "hr-modifications";
@@ -134,6 +143,7 @@ const EMPTY_MODS: HRModifications = {
   disabilities: [],
   transfers: [],
   newWorkers: [],
+  regulatoryBodies: [],
 };
 
 /** Fresh empty mods with NEW array/object instances (never shared refs).
@@ -145,6 +155,7 @@ function emptyMods(): HRModifications {
     disabilities: [],
     transfers: [],
     newWorkers: [],
+    regulatoryBodies: [],
   };
 }
 
@@ -183,6 +194,10 @@ export function getModifications(): HRModifications {
             : [],
           transfers: Array.isArray(mods.transfers) ? mods.transfers : [],
           newWorkers,
+          regulatoryBodies: (Array.isArray(mods.regulatoryBodies)
+            ? mods.regulatoryBodies
+            : []
+          ).filter((b: any) => b && b.id && b.name),
         };
       }
     }
@@ -241,6 +256,14 @@ function toRows(mods: HRModifications): HRChangeRow[] {
       change_type: "transfer",
       ref_id: t.id,
       data: t,
+    });
+  }
+  for (const b of mods.regulatoryBodies || []) {
+    rows.push({
+      id: `regulatory_body:${b.id}`,
+      change_type: "regulatory_body",
+      ref_id: b.id,
+      data: b,
     });
   }
   return rows;
@@ -328,6 +351,10 @@ export async function pullChangesFromBackend(): Promise<HRModifications | null> 
           break;
         case "transfer":
           if (row.ref_id) mods.transfers.push(data as TransferRecord);
+          break;
+        case "regulatory_body":
+          if (row.ref_id)
+            mods.regulatoryBodies.push(data as RegulatoryBodyRecord);
           break;
       }
     }
@@ -503,4 +530,42 @@ export function removeNewWorker(id: string): void {
 
 export function getNewWorkers(): NewWorkerRecord[] {
   return getModifications().newWorkers || [];
+}
+
+// Regulatory body functions
+//
+// HR can add a professional council that is not in the built-in list. The
+// custom bodies live in the same modifications store as everything else, so
+// they sync to the shared backend and show up in the Add Worker form on every
+// browser (not just the one that created them).
+export function addRegulatoryBody(name: string): RegulatoryBodyRecord | null {
+  const clean = name.trim();
+  if (!clean) return null;
+  const mods = getModifications();
+  const exists = mods.regulatoryBodies.some(
+    (b) => b.name.toLowerCase() === clean.toLowerCase(),
+  );
+  if (exists) return null;
+  const record: RegulatoryBodyRecord = {
+    id: `regbody-${Date.now()}`,
+    name: clean,
+    createdAt: new Date().toISOString(),
+  };
+  mods.regulatoryBodies.push(record);
+  saveModifications(mods);
+  pushChangesToBackend();
+  return record;
+}
+
+export function removeRegulatoryBody(id: string): void {
+  const mods = getModifications();
+  mods.regulatoryBodies = (mods.regulatoryBodies || []).filter(
+    (b) => b.id !== id,
+  );
+  saveModifications(mods);
+  deleteChangeFromBackend("regulatory_body", id);
+}
+
+export function getRegulatoryBodies(): RegulatoryBodyRecord[] {
+  return getModifications().regulatoryBodies || [];
 }

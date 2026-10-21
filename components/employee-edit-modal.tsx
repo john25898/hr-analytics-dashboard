@@ -114,6 +114,7 @@ export function EmployeeEditModal({
   const [noticeDate, setNoticeDate] = React.useState("");
   const [exitDateInput, setExitDateInput] = React.useState("");
   const [fullySignedDate, setFullySignedDate] = React.useState("");
+  const [duesPaidDate, setDuesPaidDate] = React.useState("");
   const [certificateDate, setCertificateDate] = React.useState("");
   const [exitDatesSaved, setExitDatesSaved] = React.useState(false);
 
@@ -141,6 +142,7 @@ export function EmployeeEditModal({
       setNoticeDate(toInputDate(edit?.noticeDate));
       setExitDateInput(toInputDate(edit?.exitDate));
       setFullySignedDate(toInputDate(edit?.fullySignedDate));
+      setDuesPaidDate(toInputDate(edit?.duesPaidDate));
       setCertificateDate(toInputDate(edit?.certificateDate));
       setExitDatesSaved(false);
     }
@@ -207,6 +209,9 @@ export function EmployeeEditModal({
       fullySignedDate: fullySignedDate
         ? new Date(fullySignedDate).toISOString()
         : undefined,
+      duesPaidDate: duesPaidDate
+        ? new Date(duesPaidDate).toISOString()
+        : undefined,
       certificateDate: certificateDate
         ? new Date(certificateDate).toISOString()
         : undefined,
@@ -217,7 +222,7 @@ export function EmployeeEditModal({
     onEmployeeUpdated?.();
   };
 
-  /** Persist the four exit document dates without exiting the employee yet. */
+  /** Persist the exit document dates without exiting the employee yet. */
   const handleSaveExitDates = () => {
     if (!employee.name) return;
     updateEmployeeEdit(employee.name, {
@@ -227,6 +232,9 @@ export function EmployeeEditModal({
         : undefined,
       fullySignedDate: fullySignedDate
         ? new Date(fullySignedDate).toISOString()
+        : undefined,
+      duesPaidDate: duesPaidDate
+        ? new Date(duesPaidDate).toISOString()
         : undefined,
       certificateDate: certificateDate
         ? new Date(certificateDate).toISOString()
@@ -628,6 +636,14 @@ export function EmployeeEditModal({
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">
+                    Date Dues Paid
+                  </p>
+                  <p className="font-medium text-sm">
+                    {formatDate(existingEdit?.duesPaidDate)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">
                     Date of Certificate
                   </p>
                   <p className="font-medium text-sm">
@@ -674,6 +690,12 @@ export function EmployeeEditModal({
                       set: setFullySignedDate,
                     },
                     {
+                      key: "dues",
+                      label: "Date Dues Paid",
+                      value: duesPaidDate,
+                      set: setDuesPaidDate,
+                    },
+                    {
                       key: "cert",
                       label: "Date of Certificate",
                       value: certificateDate,
@@ -701,6 +723,7 @@ export function EmployeeEditModal({
                       !noticeDate &&
                       !exitDateInput &&
                       !fullySignedDate &&
+                      !duesPaidDate &&
                       !certificateDate
                     }
                   >
@@ -751,11 +774,12 @@ export function EmployeeEditModal({
                         ? `This will mark the employee as departed on ${formatDate(exitDateInput)}.`
                         : "Enter the exit date above before confirming — it defaults to today if left blank."}
                     </p>
-                    <div className="mt-2 grid grid-cols-1 gap-1 text-xs text-muted-foreground sm:grid-cols-3">
+                    <div className="mt-2 grid grid-cols-1 gap-1 text-xs text-muted-foreground sm:grid-cols-2">
                       <span>Notice: {formatDate(noticeDate) || "-"}</span>
                       <span>
                         Fully signed: {formatDate(fullySignedDate) || "-"}
                       </span>
+                      <span>Dues paid: {formatDate(duesPaidDate) || "-"}</span>
                       <span>
                         Certificate: {formatDate(certificateDate) || "-"}
                       </span>

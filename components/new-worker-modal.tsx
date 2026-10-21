@@ -8,6 +8,7 @@ import { Plus } from "lucide-react";
 import {
   addDisability,
   addNewWorker,
+  getRegulatoryBodies,
   type NewWorkerRecord,
 } from "@/lib/employee-store";
 import {
@@ -21,9 +22,9 @@ import {
   DISABILITY_TYPES,
   EDUCATION_LEVELS,
   PROJECTS,
-  REGULATORY_BODIES,
   SUPPORT_SUGGESTIONS,
   WORKSTATIONS,
+  mergeRegulatoryBodies,
 } from "@/lib/hr-options";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -61,6 +62,11 @@ export function NewWorkerModal({
   const [qualification, setQualification] = React.useState("");
   const [othersCert, setOthersCert] = React.useState("");
   const [regulatoryBody, setRegulatoryBody] = React.useState("");
+  // Built-in councils plus any custom ones HR has added on the Regulatory
+  // Bodies page. Re-read on open so bodies added after mount still show up.
+  const [bodyOptions, setBodyOptions] = React.useState<string[]>(() =>
+    mergeRegulatoryBodies(),
+  );
   const [licenceNo, setLicenceNo] = React.useState("");
   const [validUntil, setValidUntil] = React.useState("");
   const [disability, setDisability] = React.useState("");
@@ -119,6 +125,12 @@ export function NewWorkerModal({
 
   React.useEffect(() => {
     if (open) reset();
+  }, [open]);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const custom = getRegulatoryBodies().map((b) => b.name);
+    setBodyOptions(mergeRegulatoryBodies(custom));
   }, [open]);
 
   const handleSubmit = async () => {
@@ -580,7 +592,7 @@ export function NewWorkerModal({
                 className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 <option value="">Select regulatory body</option>
-                {REGULATORY_BODIES.map((b) => (
+                {bodyOptions.map((b) => (
                   <option key={b} value={b}>
                     {b}
                   </option>

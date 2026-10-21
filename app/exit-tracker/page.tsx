@@ -130,7 +130,7 @@ function formatDate(date: any) {
   }
 }
 
-export default function DepartedPage() {
+export default function ExitTrackerPage() {
   const { data: employees, isLoading } = useSWR(
     "/api/employees?limit=1000&includeDeparted=true",
     fetcher,
@@ -161,8 +161,12 @@ export default function DepartedPage() {
           name,
           designation: emp?.designation || "",
           county: emp?.county || "",
+          dateOfJoining: emp?.dateEmployed || edit.dateEmployed || "",
           exitReason: edit.exitReason,
           exitDate: edit.exitDate,
+          fullySignedDate: edit.fullySignedDate,
+          duesPaidDate: edit.duesPaidDate,
+          certificateDate: edit.certificateDate,
           daysAgo: edit.exitDate
             ? Math.floor(
                 (now.getTime() - new Date(edit.exitDate).getTime()) /
@@ -206,6 +210,10 @@ export default function DepartedPage() {
         return {
           ...emp,
           endOfContractDate: contractDate,
+          dateOfJoining: emp.dateEmployed || storedEdit?.dateEmployed || "",
+          fullySignedDate: storedEdit?.fullySignedDate,
+          duesPaidDate: storedEdit?.duesPaidDate,
+          certificateDate: storedEdit?.certificateDate,
           exitReason: "end_of_contract",
           daysAgo: Math.floor(
             (now.getTime() - new Date(contractDate).getTime()) /
@@ -257,11 +265,9 @@ export default function DepartedPage() {
       <BackButton />
 
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">
-          Departed Employees
-        </h2>
+        <h2 className="text-3xl font-bold tracking-tight">Exit Tracker</h2>
         <p className="text-muted-foreground mt-1">
-          Employees who have exited the organization
+          Track staff exits and the offboarding paperwork for each one
         </p>
       </div>
 
@@ -271,7 +277,7 @@ export default function DepartedPage() {
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Trash2 className="h-4 w-4 text-red-600" />
-              Total Departed
+              Total Exits
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -296,7 +302,7 @@ export default function DepartedPage() {
               {allDeparted.filter((e: any) => e.daysAgo <= 30).length}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Departed in last 30 days
+              Exited in last 30 days
             </p>
           </CardContent>
         </Card>
@@ -345,7 +351,7 @@ export default function DepartedPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Departed Staff List</CardTitle>
+              <CardTitle>Exit Staff List</CardTitle>
               <CardDescription>
                 {allDeparted.length}{" "}
                 {allDeparted.length === 1 ? "employee" : "employees"} recorded
@@ -374,9 +380,7 @@ export default function DepartedPage() {
         <CardContent>
           {allDeparted.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">
-                No departed employees recorded
-              </p>
+              <p className="text-muted-foreground">No exits recorded yet</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -384,39 +388,58 @@ export default function DepartedPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Designation</TableHead>
-                    <TableHead>County</TableHead>
-                    <TableHead>Date Departed</TableHead>
-                    <TableHead className="text-right">Days Ago</TableHead>
+                    <TableHead>Position</TableHead>
+                    <TableHead>Date of Joining</TableHead>
+                    <TableHead>Exit Date</TableHead>
+                    <TableHead>Date Fully Signed</TableHead>
+                    <TableHead>Date Dues Paid</TableHead>
+                    <TableHead>Certificate of Service</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {allDeparted.map((emp: any, idx: number) => (
                     <TableRow key={idx} className="text-muted-foreground">
-                      <TableCell className="font-medium">{emp.name}</TableCell>
-                      <TableCell>{getCategoryBadge(emp.exitReason)}</TableCell>
+                      <TableCell className="font-medium">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-foreground">{emp.name}</span>
+                          {getCategoryBadge(emp.exitReason)}
+                        </div>
+                      </TableCell>
                       <TableCell className="text-sm">
                         {emp.designation || "-"}
                       </TableCell>
-                      <TableCell className="text-sm">
-                        {emp.county || "-"}
+                      <TableCell className="text-sm whitespace-nowrap">
+                        {formatDate(emp.dateOfJoining)}
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell className="text-sm whitespace-nowrap">
                         {formatDate(
                           emp.exitDate ||
                             emp.endOfContractDate ||
                             emp.validUntil,
                         )}
                       </TableCell>
-                      <TableCell className="text-right">
-                        <Badge
-                          variant={
-                            emp.daysAgo <= 30 ? "destructive" : "secondary"
-                          }
-                        >
-                          {emp.daysAgo}d
-                        </Badge>
+                      <TableCell className="text-sm whitespace-nowrap">
+                        {formatDate(emp.fullySignedDate)}
+                      </TableCell>
+                      <TableCell className="text-sm whitespace-nowrap">
+                        {formatDate(emp.duesPaidDate)}
+                      </TableCell>
+                      <TableCell className="text-sm whitespace-nowrap">
+                        {emp.certificateDate ? (
+                          <Badge
+                            variant="outline"
+                            className="bg-green-50 text-green-700 border-green-200"
+                          >
+                            {formatDate(emp.certificateDate)}
+                          </Badge>
+                        ) : (
+                          <Badge
+                            variant="outline"
+                            className="bg-orange-50 text-orange-700 border-orange-200"
+                          >
+                            Not issued
+                          </Badge>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -431,8 +454,8 @@ export default function DepartedPage() {
       {allDeparted.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Departed Employees by County</CardTitle>
-            <CardDescription>Distribution of departed staff</CardDescription>
+            <CardTitle>Exits by County</CardTitle>
+            <CardDescription>Distribution of exited staff</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
