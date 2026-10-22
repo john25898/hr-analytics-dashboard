@@ -114,6 +114,10 @@ function applyEdit(emp: Employee, edit: any): Employee {
   }
   if (edit?.endOfContract) next.contractEnd = edit.endOfContract;
   if (edit?.category) next.category = edit.category;
+  // Staff record details editable from the employee modal.
+  if (edit?.staffNo) next.staffNo = edit.staffNo;
+  if (edit?.department) next.department = edit.department;
+  if (edit?.companyPhone) next.companyPhone = edit.companyPhone;
   if (typeof edit?.isDeparted === "boolean") next.isDeparted = edit.isDeparted;
   if (edit?.exitReason) (next as any).exitReason = edit.exitReason;
   if (edit?.exitDate) (next as any).exitDate = edit.exitDate;
@@ -145,12 +149,15 @@ function newWorkerToEmployee(w: any): Employee {
     employmentType: w?.employmentType || undefined,
     project: w?.project || undefined,
     workstation: w?.workstation || undefined,
+    staffNo: w?.staffNo || undefined,
+    department: w?.department || undefined,
+    companyPhone: w?.companyPhone || undefined,
+    workEmail: w?.workEmail || undefined,
+    personalEmail: w?.personalEmail || undefined,
     validUntil: w?.validUntil || undefined,
     contractEnd: w?.contractEnd || undefined,
     phone: w?.phone,
     idNo: w?.idNo,
-    workEmail: w?.workEmail || undefined,
-    personalEmail: w?.personalEmail || undefined,
     educationLevel: w?.educationLevel || undefined,
     qualification: w?.qualification || undefined,
     regulatoryBody: w?.regulatoryBody || undefined,

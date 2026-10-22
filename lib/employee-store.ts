@@ -38,6 +38,10 @@ export interface EmployeeEdit {
   license?: LicenseDetails;
   // HRH | CHAK | CBSL — used by the dashboard category filter.
   category?: string;
+  // Staff record details that can be filled in after intake.
+  staffNo?: string;
+  department?: string;
+  companyPhone?: string;
 }
 
 export interface DisabilityRecord {
@@ -88,6 +92,12 @@ export interface NewWorkerRecord {
   gender: string;
   phone: string;
   idNo: string;
+  // Organisation-issued staff / payroll number, e.g. CHAK-0412.
+  staffNo?: string;
+  // Department the staff member belongs to.
+  department?: string;
+  // Company line, separate from the personal phone number.
+  companyPhone?: string;
   // Official (work) and personal email addresses.
   workEmail?: string;
   personalEmail?: string;

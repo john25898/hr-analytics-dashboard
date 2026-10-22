@@ -19,6 +19,7 @@ import {
 import {
   CATEGORIES,
   CONTRACT_TYPES,
+  DEPARTMENTS,
   DISABILITY_TYPES,
   EDUCATION_LEVELS,
   PROJECTS,
@@ -42,12 +43,15 @@ export function NewWorkerModal({
   const router = useRouter();
 
   const [name, setName] = React.useState("");
+  const [staffNo, setStaffNo] = React.useState("");
   const [gender, setGender] = React.useState("");
   const [phone, setPhone] = React.useState("");
+  const [companyPhone, setCompanyPhone] = React.useState("");
   const [idNo, setIdNo] = React.useState("");
   const [workEmail, setWorkEmail] = React.useState("");
   const [personalEmail, setPersonalEmail] = React.useState("");
   const [category, setCategory] = React.useState("");
+  const [department, setDepartment] = React.useState("");
   const [employmentType, setEmploymentType] = React.useState("");
   const [project, setProject] = React.useState("");
   const [workstation, setWorkstation] = React.useState("");
@@ -96,12 +100,15 @@ export function NewWorkerModal({
 
   const reset = () => {
     setName("");
+    setStaffNo("");
     setGender("");
     setPhone("");
+    setCompanyPhone("");
     setIdNo("");
     setWorkEmail("");
     setPersonalEmail("");
     setCategory("");
+    setDepartment("");
     setEmploymentType("");
     setProject("");
     setWorkstation("");
@@ -157,12 +164,15 @@ export function NewWorkerModal({
     const record: NewWorkerRecord = {
       id: `worker-${Date.now()}`,
       name: name.trim(),
+      staffNo: staffNo.trim(),
       gender,
       phone,
+      companyPhone: companyPhone.trim(),
       idNo,
       workEmail: workEmail.trim(),
       personalEmail: personalEmail.trim(),
       category,
+      department,
       employmentType,
       project,
       workstation: isChak ? workstation : "",
@@ -274,6 +284,17 @@ export function NewWorkerModal({
               />
             </div>
             <div>
+              <label className="text-sm font-medium mb-1.5 block">
+                Staff No.
+              </label>
+              <input
+                value={staffNo}
+                onChange={(e) => setStaffNo(e.target.value)}
+                placeholder="e.g. CHAK-0412"
+                className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              />
+            </div>
+            <div>
               <label className="text-sm font-medium mb-1.5 block">Gender</label>
               <select
                 value={gender}
@@ -302,6 +323,17 @@ export function NewWorkerModal({
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="0712345678"
+                className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">
+                Company Phone No.
+              </label>
+              <input
+                value={companyPhone}
+                onChange={(e) => setCompanyPhone(e.target.value)}
+                placeholder="Office / company line"
                 className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               />
             </div>
@@ -386,6 +418,23 @@ export function NewWorkerModal({
                 {CONTRACT_TYPES.map((t) => (
                   <option key={t} value={t}>
                     {t}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">
+                Department
+              </label>
+              <select
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
+                className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+                <option value="">Select department</option>
+                {DEPARTMENTS.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
                   </option>
                 ))}
               </select>

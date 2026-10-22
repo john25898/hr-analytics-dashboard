@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Employee } from "@/lib/excel-data";
-import { getEmployeeEdit } from "@/lib/employee-store";
+import { getDisabilities, getEmployeeEdit } from "@/lib/employee-store";
 import { normalizeCategory } from "@/lib/hr-options";
 
 const CATEGORY_BADGE_CLASSES: Record<string, string> = {
@@ -90,16 +90,37 @@ export function EmployeesTable({
   // re-rendered the whole 181-row table constantly. The store already
   // broadcasts `hr-modifications-change` when data actually changes.
 
+  // Disability declarations live in their own register, so build a name index
+  // once instead of reading storage for every row.
+  const disabilityByName = React.useMemo(() => {
+    const map: Record<string, string> = {};
+    try {
+      getDisabilities().forEach((d) => {
+        if (d?.name && d?.disability) map[d.name] = d.disability;
+      });
+    } catch {
+      // storage unavailable — fall back to the employee record only
+    }
+    return map;
+  }, [employees]);
+
   return (
     <div className="overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead className="font-semibold">Name</TableHead>
+            <TableHead className="font-semibold">Staff No.</TableHead>
             <TableHead className="font-semibold">Gender</TableHead>
             <TableHead className="font-semibold">Category</TableHead>
             <TableHead className="font-semibold">Age</TableHead>
             <TableHead className="font-semibold">Designation</TableHead>
+            <TableHead className="font-semibold">Department</TableHead>
+            <TableHead className="font-semibold">Project / Program</TableHead>
+            <TableHead className="font-semibold">Contract Type</TableHead>
+            <TableHead className="font-semibold">Disability (Yes/No)</TableHead>
+            <TableHead className="font-semibold">Work Email</TableHead>
+            <TableHead className="font-semibold">Company Phone No.</TableHead>
             <TableHead className="font-semibold">County</TableHead>
             <TableHead className="font-semibold">Station</TableHead>
             <TableHead className="font-semibold">License Status</TableHead>
@@ -134,6 +155,11 @@ export function EmployeesTable({
                 <TableCell className="font-medium">
                   {employee.name || "-"}
                 </TableCell>
+                <TableCell className="text-xs font-mono whitespace-nowrap">
+                  {employee.staffNo || (
+                    <span className="text-muted-foreground">-</span>
+                  )}
+                </TableCell>
                 <TableCell>
                   {getGenderBadge(employee.gender as string)}
                 </TableCell>
@@ -165,6 +191,47 @@ export function EmployeesTable({
                 </TableCell>
                 <TableCell className="text-sm">
                   {employee.designation || "-"}
+                </TableCell>
+                <TableCell className="text-sm">
+                  {employee.department || (
+                    <span className="text-muted-foreground">-</span>
+                  )}
+                </TableCell>
+                <TableCell className="text-sm">
+                  {employee.project || (
+                    <span className="text-muted-foreground">-</span>
+                  )}
+                </TableCell>
+                <TableCell className="text-sm">
+                  {employee.employmentType || (
+                    <span className="text-muted-foreground">-</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {(() => {
+                    const declared =
+                      employee.disability || disabilityByName[employee.name];
+                    return declared ? (
+                      <Badge
+                        className="bg-amber-100 text-amber-800"
+                        title={declared}
+                      >
+                        Yes
+                      </Badge>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">No</span>
+                    );
+                  })()}
+                </TableCell>
+                <TableCell className="text-sm">
+                  {employee.workEmail || (
+                    <span className="text-muted-foreground">-</span>
+                  )}
+                </TableCell>
+                <TableCell className="text-sm whitespace-nowrap">
+                  {employee.companyPhone || (
+                    <span className="text-muted-foreground">-</span>
+                  )}
                 </TableCell>
                 <TableCell className="text-sm">
                   {employee.county || "-"}

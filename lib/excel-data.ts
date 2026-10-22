@@ -31,6 +31,11 @@ export interface Employee {
   workstation?: string;
   workEmail?: string;
   personalEmail?: string;
+  // Payroll / HR identifier assigned by the organisation.
+  staffNo?: string;
+  department?: string;
+  // Company-issued line (kept separate from the personal phone).
+  companyPhone?: string;
   disability?: string;
   supportNeeded?: string;
   [key: string]: any;

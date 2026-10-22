@@ -63,6 +63,22 @@ export const WORKSTATIONS = [
   "Tharaka Nithi Office",
 ];
 
+// Organisational department a staff member belongs to.
+export const DEPARTMENTS = [
+  "Programs",
+  "Health Services",
+  "Finance",
+  "Human Resources",
+  "ICT",
+  "Monitoring & Evaluation",
+  "Communications",
+  "Administration",
+  "Procurement & Logistics",
+  "Internal Audit",
+  "Legal & Compliance",
+  "Other",
+];
+
 // Highest academic level attained.
 export const EDUCATION_LEVELS = [
   "PhD",

@@ -32,6 +32,7 @@ import {
   type StatutoryProvisions,
 } from "@/lib/employee-store";
 import { TransferModal } from "@/components/transfer-modal";
+import { DEPARTMENTS } from "@/lib/hr-options";
 
 interface EmployeeEditModalProps {
   employee: Employee | null;
@@ -109,6 +110,11 @@ export function EmployeeEditModal({
   const [provisions, setProvisions] = React.useState<StatutoryProvisions>({});
   const [licenseNo, setLicenseNo] = React.useState("");
   const [licenseValidUntil, setLicenseValidUntil] = React.useState("");
+  // Staff record details (staff number, department, company line).
+  const [staffNo, setStaffNo] = React.useState("");
+  const [department, setDepartment] = React.useState("");
+  const [companyPhone, setCompanyPhone] = React.useState("");
+  const [staffRecordSaved, setStaffRecordSaved] = React.useState(false);
   const [transferModalOpen, setTransferModalOpen] = React.useState(false);
   // Exit documentation dates — captured before the employee is exited.
   const [noticeDate, setNoticeDate] = React.useState("");
@@ -134,6 +140,10 @@ export function EmployeeEditModal({
           ? toInputDate(edit.license.validUntil)
           : toInputDate(employee.validUntil),
       );
+      setStaffNo(edit?.staffNo ?? employee.staffNo ?? "");
+      setDepartment(edit?.department ?? employee.department ?? "");
+      setCompanyPhone(edit?.companyPhone ?? employee.companyPhone ?? "");
+      setStaffRecordSaved(false);
       setSelectedReason("");
       setConfirmExit(false);
       setSaved(false);
@@ -182,6 +192,18 @@ export function EmployeeEditModal({
     updateProvisions(employee.name, provisions);
     setProvisionsSaved(true);
     setTimeout(() => setProvisionsSaved(false), 2000);
+    onEmployeeUpdated?.();
+  };
+
+  const handleSaveStaffRecord = () => {
+    if (!employee.name) return;
+    updateEmployeeEdit(employee.name, {
+      staffNo: staffNo.trim() || undefined,
+      department: department || undefined,
+      companyPhone: companyPhone.trim() || undefined,
+    });
+    setStaffRecordSaved(true);
+    setTimeout(() => setStaffRecordSaved(false), 2000);
     onEmployeeUpdated?.();
   };
 
@@ -366,6 +388,56 @@ export function EmployeeEditModal({
                 <p className="font-medium text-sm">{employee.station || "-"}</p>
               </div>
             </div>
+          </div>
+
+          {/* Staff Record — staff number, department, company line */}
+          <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-4">
+            <h4 className="font-semibold text-sm flex items-center gap-2">
+              <User className="h-4 w-4" />
+              Staff Record
+            </h4>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div>
+                <p className="text-xs text-muted-foreground mb-1.5">
+                  Staff No.
+                </p>
+                <Input
+                  value={staffNo}
+                  placeholder="e.g. CHAK-0412"
+                  onChange={(e) => setStaffNo(e.target.value)}
+                />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-1.5">
+                  Department
+                </p>
+                <select
+                  value={department}
+                  onChange={(e) => setDepartment(e.target.value)}
+                  className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                >
+                  <option value="">Select department</option>
+                  {DEPARTMENTS.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-1.5">
+                  Company Phone No.
+                </p>
+                <Input
+                  value={companyPhone}
+                  placeholder="Office / company line"
+                  onChange={(e) => setCompanyPhone(e.target.value)}
+                />
+              </div>
+            </div>
+            <Button size="sm" onClick={handleSaveStaffRecord}>
+              {staffRecordSaved ? "✓ Saved!" : "Save Staff Record"}
+            </Button>
           </div>
 
           {/* Education & Age */}
